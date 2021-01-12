@@ -33,7 +33,7 @@ target_include_directories(evmone PUBLIC
     $<BUILD_INTERFACE:${include_dir}>$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 if(CABLE_COMPILER_GNULIKE)
-    target_compile_options(evmone PRIVATE -fno-exceptions)
+    target_compile_options(evmone PRIVATE -fno-exceptions -fno-slp-vectorize)
     if (NOT SANITIZE MATCHES undefined)
         # RTTI can be disabled except for UBSan which checks vptr integrity.
         target_compile_options(evmone PRIVATE -fno-rtti)
