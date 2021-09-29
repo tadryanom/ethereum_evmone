@@ -5,6 +5,7 @@
 #include "eof.hpp"
 
 #include <array>
+#include <cassert>
 
 namespace evmone
 {
@@ -13,6 +14,16 @@ namespace
 constexpr uint8_t FORMAT = 0xef;
 constexpr uint8_t MAGIC = 0x00;
 }  // namespace
+
+size_t EOF1Header::code_begin() const noexcept
+{
+    assert(code_size != 0);
+
+    if (data_size == 0)
+        return 7;  // EF + MAGIC + VERSION + SECTION_ID + SIZE + TERMINATOR
+    else
+        return 10;  // EF + MAGIC + VERSION + SECTION_ID + SIZE + SECTION_ID + SIZE + TERMINATOR
+}
 
 bool is_eof_code(const uint8_t* code, size_t code_size) noexcept
 {

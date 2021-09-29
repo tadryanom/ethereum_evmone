@@ -125,6 +125,7 @@ struct ExecutionState
     /// Reference to original EVM code.
     /// TODO: Code should be accessed via code analysis only and this should be removed.
     bytes_view code;
+    bytes_view original_code;
 
     evmc_status_code status = EVMC_SUCCESS;
     size_t output_offset = 0;
@@ -147,7 +148,8 @@ struct ExecutionState
         msg{&message},
         host{host_interface, host_ctx},
         rev{revision},
-        code{code_ptr, code_size}
+        code{code_ptr, code_size},
+        original_code{code_ptr, code_size}
     {}
 
     /// Resets the contents of the ExecutionState so that it could be reused.
@@ -163,6 +165,7 @@ struct ExecutionState
         rev = revision;
         return_data.clear();
         code = {code_ptr, code_size};
+        original_code = {code_ptr, code_size};
         status = EVMC_SUCCESS;
         output_offset = 0;
         output_size = 0;
