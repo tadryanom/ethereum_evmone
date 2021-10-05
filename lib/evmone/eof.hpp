@@ -17,6 +17,7 @@ struct EOF1Header
     size_t data_size = 0;
 
     EVMC_EXPORT size_t code_begin() const noexcept;
+    EVMC_EXPORT size_t code_end() const noexcept;
 };
 
 // Checks if code starts with EOF FORMAT + MAGIC, doesn't validate the format.
@@ -45,6 +46,7 @@ enum class EOFValidationErrror
     undefined_instruction,
     truncated_immediate,
     missing_terminating_instruction,
+    invalid_rjump_destination,
 
     impossible,
 };

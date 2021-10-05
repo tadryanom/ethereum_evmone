@@ -8,6 +8,7 @@
 #include <array>
 #include <cassert>
 #include <limits>
+#include <vector>
 
 namespace evmone
 {
@@ -127,6 +128,39 @@ EOFValidationErrror validate_instructions(
     return EOFValidationErrror::success;
 }
 
+bool validate_rjump_destinations(const EOF1Header& header, const uint8_t* code) noexcept
+{
+    // Collect relative jump destinations and immediate locations
+    std::vector<size_t> rjumpdests;
+    std::vector<bool> immediate_map(header.code_end());
+    for (auto i = header.code_begin(); i < header.code_end(); ++i)
+    {
+        const auto op = code[i];
+
+        if (op == OP_RJUMP || op == OP_RJUMPI)
+        {
+            const auto offset_hi = code[i + 1];
+            const auto offset_lo = code[i + 2];
+            const auto offset = static_cast<int16_t>((offset_hi << 8) + offset_lo);
+            const auto jumpdest = static_cast<int32_t>(i) + 3 + offset;
+            if (jumpdest < static_cast<int32_t>(header.code_begin()) ||
+                jumpdest >= static_cast<int32_t>(header.code_end()))
+                return false;
+            rjumpdests.push_back(static_cast<size_t>(jumpdest));
+        }
+
+        const auto imm_size = instr::traits[op].immediate_size;
+        std::fill_n(immediate_map.begin() + static_cast<ptrdiff_t>(i) + 1, imm_size, true);
+        i += imm_size;
+    }
+
+    // Check relative jump destinations against immediate locations.
+    for (const auto rjumpdest : rjumpdests)
+        if (immediate_map[rjumpdest])
+            return false;
+
+    return true;
+}
 }  // namespace
 
 size_t EOF1Header::code_begin() const noexcept
@@ -137,6 +171,11 @@ size_t EOF1Header::code_begin() const noexcept
         return 7;  // EF + MAGIC + VERSION + SECTION_ID + SIZE + TERMINATOR
     else
         return 10;  // EF + MAGIC + VERSION + SECTION_ID + SIZE + SECTION_ID + SIZE + TERMINATOR
+}
+
+size_t EOF1Header::code_end() const noexcept
+{
+    return code_begin() + code_size;
 }
 
 bool is_eof_code(const uint8_t* code, size_t code_size) noexcept
@@ -175,6 +214,9 @@ std::pair<EOF1Header, EOFValidationErrror> validate_eof1(
         validate_instructions(rev, &code[header.code_begin()], header.code_size);
     if (error_instr != EOFValidationErrror::success)
         return {{}, error_instr};
+
+    if (!validate_rjump_destinations(header, code))
+        return {{}, EOFValidationErrror::invalid_rjump_destination};
 
     return {header, EOFValidationErrror::success};
 }
