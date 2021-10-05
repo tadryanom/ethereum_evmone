@@ -103,5 +103,7 @@ protected:
     {
         execute({code.data(), code.size()}, input_hex);
     }
+
+    bool isAdvanced() const noexcept;
 };
 }  // namespace evmone::test
