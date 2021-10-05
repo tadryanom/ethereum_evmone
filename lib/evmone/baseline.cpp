@@ -445,6 +445,12 @@ evmc_result execute(const VM& vm, ExecutionState& state, const CodeAnalysis& ana
         case OP_JUMPDEST:
             jumpdest(state);
             DISPATCH_NEXT();
+        case OP_RJUMP:
+            code_it = rjump(state, code_it);
+            DISPATCH();
+        case OP_RJUMPI:
+            code_it = rjumpi(state, code_it);
+            DISPATCH();
 
         case OP_PUSH1:
             code_it = push<1>(state, code_it);
