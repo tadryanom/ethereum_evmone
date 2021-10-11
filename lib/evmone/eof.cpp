@@ -3,9 +3,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "eof.hpp"
+#include "instruction_traits.hpp"
 
 #include <array>
 #include <cassert>
+#include <limits>
 
 namespace evmone
 {
@@ -99,6 +101,26 @@ std::pair<EOFSectionHeaders, EOFValidationErrror> validate_eof_headers(
     return {section_headers, EOFValidationErrror::success};
 }
 
+EOFValidationErrror validate_instructions(
+    evmc_revision rev, const uint8_t* code, size_t code_size) noexcept
+{
+    size_t i = 0;
+    while (i < code_size)
+    {
+        const auto op = code[i];
+        const auto& since = instr::traits[op].since;
+        if (!since.has_value() || *since > rev)
+            return EOFValidationErrror::undefined_instruction;
+
+        i += instr::traits[op].immediate_size;
+        ++i;
+    }
+    if (i != code_size)
+        return EOFValidationErrror::truncated_immediate;
+
+    return EOFValidationErrror::success;
+}
+
 }  // namespace
 
 size_t EOF1Header::code_begin() const noexcept
@@ -135,13 +157,19 @@ uint8_t get_eof_version(const uint8_t* code, size_t code_size) noexcept
 }
 
 std::pair<EOF1Header, EOFValidationErrror> validate_eof1(
-    const uint8_t* code, size_t code_size) noexcept
+    evmc_revision rev, const uint8_t* code, size_t code_size) noexcept
 {
-    const auto [section_headers, error] = validate_eof_headers(code, code_size);
-    if (error != EOFValidationErrror::success)
-        return {{}, error};
+    const auto [section_headers, error_header] = validate_eof_headers(code, code_size);
+    if (error_header != EOFValidationErrror::success)
+        return {{}, error_header};
 
     EOF1Header header{section_headers[CODE_SECTION], section_headers[DATA_SECTION]};
+
+    const auto error_instr =
+        validate_instructions(rev, &code[header.code_begin()], header.code_size);
+    if (error_instr != EOFValidationErrror::success)
+        return {{}, error_instr};
+
     return {header, EOFValidationErrror::success};
 }
 
@@ -160,7 +188,7 @@ EOFValidationErrror validate_eof(evmc_revision rev, const uint8_t* code, size_t 
     {
         if (rev < EVMC_SHANGHAI)
             return EOFValidationErrror::eof_version_unknown;
-        return validate_eof1(code, code_size).second;
+        return validate_eof1(rev, code, code_size).second;
     }
     }
 }
