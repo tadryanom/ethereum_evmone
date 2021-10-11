@@ -137,3 +137,29 @@ TEST(eof_validation, EOF1_truncated_push)
         EXPECT_EQ(validate_eof(container), EOFValidationErrror::success) << hex(container);
     }
 }
+
+TEST(eof_validation, EOF1_terminating_instructions)
+{
+    auto eof_header = from_hex("EF0001 010001 00");
+    auto& code_size_byte = eof_header[5];
+
+    const auto& traits = evmone::instr::traits;
+
+    for (uint16_t opcode = 0; opcode <= 0xff; ++opcode)
+    {
+        const auto& op_traits = traits[opcode];
+        // Skip undefined opcodes.
+        if (op_traits.name == nullptr)
+            continue;
+
+        bytes code{static_cast<uint8_t>(opcode) + bytes(op_traits.immediate_size, 0)};
+        code_size_byte = static_cast<uint8_t>(code.size());
+        const auto container = eof_header + code;
+
+        const auto expected = ((opcode == OP_STOP || opcode == OP_RETURN || opcode == OP_REVERT ||
+                                   opcode == OP_INVALID || opcode == OP_SELFDESTRUCT) ?
+                                   EOFValidationErrror::success :
+                                   EOFValidationErrror::missing_terminating_instruction);
+        EXPECT_EQ(validate_eof(container), expected) << hex(code);
+    }
+}
