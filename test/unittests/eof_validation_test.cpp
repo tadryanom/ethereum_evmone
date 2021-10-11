@@ -92,7 +92,7 @@ TEST(eof_validation, EOF1_multiple_data_sections)
 
 TEST(eof_validation, EOF1_undefined_opcodes)
 {
-    auto code = from_hex("EF0001 010001 00 00");
+    auto code = from_hex("EF0001 010002 00 0000");
 
     const auto& gas_table = evmone::instr::gas_costs[EVMC_SHANGHAI];
 
@@ -102,7 +102,7 @@ TEST(eof_validation, EOF1_undefined_opcodes)
         if (opcode >= OP_PUSH1 && opcode <= OP_PUSH32)
             continue;
 
-        code.back() = static_cast<uint8_t>(opcode);
+        code[code.size() - 2] = static_cast<uint8_t>(opcode);
 
         const auto expected = (gas_table[opcode] == evmone::instr::undefined ?
                                    EOFValidationErrror::undefined_instruction :
@@ -130,7 +130,7 @@ TEST(eof_validation, EOF1_truncated_push)
                 << hex(container);
         }
 
-        const bytes code{opcode + bytes(required_bytes, 0)};
+        const bytes code{opcode + bytes(required_bytes, 0) + uint8_t{OP_STOP}};
         code_size_byte = static_cast<uint8_t>(code.size());
         const auto container = eof_header + code;
 

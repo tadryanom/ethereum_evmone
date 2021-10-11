@@ -104,10 +104,13 @@ std::pair<EOFSectionHeaders, EOFValidationErrror> validate_eof_headers(
 EOFValidationErrror validate_instructions(
     evmc_revision rev, const uint8_t* code, size_t code_size) noexcept
 {
+    assert(code_size > 0);  // guaranteed by EOF headers validation
+
     size_t i = 0;
+    uint8_t op = 0;
     while (i < code_size)
     {
-        const auto op = code[i];
+        op = code[i];
         const auto& since = instr::traits[op].since;
         if (!since.has_value() || *since > rev)
             return EOFValidationErrror::undefined_instruction;
@@ -117,6 +120,9 @@ EOFValidationErrror validate_instructions(
     }
     if (i != code_size)
         return EOFValidationErrror::truncated_immediate;
+
+    if (!instr::traits[op].is_terminating)
+        return EOFValidationErrror::missing_terminating_instruction;
 
     return EOFValidationErrror::success;
 }

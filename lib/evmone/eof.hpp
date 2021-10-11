@@ -44,6 +44,7 @@ enum class EOFValidationErrror
     invalid_section_bodies_size,
     undefined_instruction,
     truncated_immediate,
+    missing_terminating_instruction,
 
     impossible,
 };
