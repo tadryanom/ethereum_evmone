@@ -21,6 +21,7 @@ add_executable(evmone-unittests
     evmone_test.cpp
     execution_state_test.cpp
     instructions_test.cpp
+    state_test.cpp
     tracing_test.cpp
     utils_test.cpp
 )
