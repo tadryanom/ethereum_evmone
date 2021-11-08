@@ -19,6 +19,12 @@ inline bool operator==(const evmc::bytes32& a, const ethash::hash256& b) noexcep
     return std::memcmp(a.bytes, b.bytes, sizeof(a)) == 0;
 }
 
+inline bool operator==(const ethash::hash256& a, const evmc::bytes32& b) noexcept
+{
+    return b == a;
+}
+
+
 namespace
 {
 constexpr auto emptyStorageTrieHash =
@@ -52,6 +58,12 @@ evmc::bytes rlp_encode_len(size_t l)
     return {static_cast<uint8_t>(l)};
 }
 
+evmc::bytes rlp_encode_list(const evmc::bytes& a, const evmc::bytes& b)
+{
+    const auto l = static_cast<uint8_t>(a.size() + b.size());
+    return evmc::bytes{0xf8, l} + a + b;
+}
+
 evmc::bytes rlp_encode(const evmc::MockedAccount& a)
 {
     const auto n = rlp_encode(evmc::bytes32{static_cast<uint64_t>(a.nonce)});
@@ -63,6 +75,17 @@ evmc::bytes rlp_encode(const evmc::MockedAccount& a)
     evmc::bytes r{static_cast<uint8_t>(0xf7 + le.size())};
     r += le + n + b + s + c;
     return r;
+}
+
+ethash::hash256 hash_leaf_node(const evmc::address& address, const evmc::MockedAccount& account)
+{
+    const auto path = ethash::keccak256(address.bytes, sizeof(address));
+    const auto encoded_path = evmc::bytes{0x20} + evmc::bytes{path.bytes, sizeof(path)};
+    const auto rlp_encoded_path =
+        evmc::bytes{static_cast<uint8_t>(0x80 + encoded_path.length())} + encoded_path;
+    const auto value = rlp_encode(account);
+    const auto node = rlp_encode_list(rlp_encoded_path, value);
+    return ethash::keccak256(node.data(), node.size());
 }
 
 ethash::hash256 compute_state_root(const State& state)
@@ -95,12 +118,24 @@ TEST(state, rlp_v1)
     EXPECT_EQ(evmc::hex(rlp_encode(a)), evmc::hex(expected));
 }
 
+TEST(state, empty_trie)
+{
+    const uint8_t rlp_null = 0x80;
+    const auto empty_trie_hash = ethash::keccak256(&rlp_null, 1);
+    EXPECT_EQ(empty_trie_hash, emptyStorageTrieHash);
+}
+
 TEST(state, v1)
 {
     // Expected value computed in go-ethereum.
 
     State state;
-    state[0x0000000000000000000000000000000000000002_address].balance.bytes[31] = 1;
+    const auto addr = 0x0000000000000000000000000000000000000002_address;
+    state[addr].balance.bytes[31] = 1;
+
+    const auto h = hash_leaf_node(addr, state[addr]);
+    EXPECT_EQ(evmc::hex({h.bytes, sizeof(h)}),
+        "084f337237951e425716a04fb0aaa74111eda9d9c61767f2497697d0a201c92e");
 
     const auto r = compute_state_root(state);
     EXPECT_EQ(evmc::hex({r.bytes, sizeof(r)}),
