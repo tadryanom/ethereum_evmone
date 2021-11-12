@@ -1,0 +1,2524 @@
+{
+  "benchmarks": [
+    {
+      "name": "geth/micro/memory_grow_mload/nogrow",
+      "time_unit": "us",
+      "real_time": 242.645,
+      "cpu_time": 242.645,
+      "gas_used": 57356,
+      "gas_rate": 236378248.0578623
+    },
+    {
+      "name": "geth/micro/memory_grow_mload/nogrow",
+      "time_unit": "us",
+      "real_time": 239.732,
+      "cpu_time": 239.732,
+      "gas_used": 57356,
+      "gas_rate": 239250496.38763285
+    },
+    {
+      "name": "geth/micro/memory_grow_mload/nogrow",
+      "time_unit": "us",
+      "real_time": 242.664,
+      "cpu_time": 242.664,
+      "gas_used": 57356,
+      "gas_rate": 236359740.21692547
+    },
+    {
+      "name": "geth/micro/memory_grow_mload/nogrow",
+      "time_unit": "us",
+      "real_time": 242.365,
+      "cpu_time": 242.365,
+      "gas_used": 57356,
+      "gas_rate": 236651331.66917664
+    },
+    {
+      "name": "geth/micro/memory_grow_mload/nogrow",
+      "time_unit": "us",
+      "real_time": 255.927,
+      "cpu_time": 255.927,
+      "gas_used": 57356,
+      "gas_rate": 224110781.5900628
+    },
+    {
+      "name": "geth/micro/memory_grow_mload/nogrow",
+      "time_unit": "us",
+      "real_time": 246.258,
+      "cpu_time": 246.258,
+      "gas_used": 57356,
+      "gas_rate": 232910199.87167928
+    },
+    {
+      "name": "geth/micro/memory_grow_mload/nogrow",
+      "time_unit": "us",
+      "real_time": 248.059,
+      "cpu_time": 248.059,
+      "gas_used": 57356,
+      "gas_rate": 231219185.75822687
+    },
+    {
+      "name": "geth/micro/memory_grow_mload/nogrow",
+      "time_unit": "us",
+      "real_time": 245.517,
+      "cpu_time": 245.517,
+      "gas_used": 57356,
+      "gas_rate": 233613151.02416533
+    },
+    {
+      "name": "geth/micro/memory_grow_mload/nogrow",
+      "time_unit": "us",
+      "real_time": 251.065,
+      "cpu_time": 251.065,
+      "gas_used": 57356,
+      "gas_rate": 228450799.59373072
+    },
+    {
+      "name": "geth/micro/memory_grow_mload/nogrow",
+      "time_unit": "us",
+      "real_time": 249.585,
+      "cpu_time": 249.585,
+      "gas_used": 57356,
+      "gas_rate": 229805477.09197268
+    },
+    {
+      "name": "geth/micro/memory_grow_mload/nogrow_mean",
+      "run_type": "aggregate",
+      "aggregate_name": "mean",
+      "time_unit": "us",
+      "real_time": 246.3817,
+      "cpu_time": 246.3817,
+      "gas_used": 57356,
+      "gas_rate": 232793263.4607197
+    },
+    {
+      "name": "geth/micro/memory_grow_mload/by1",
+      "time_unit": "us",
+      "real_time": 248.844,
+      "cpu_time": 248.844,
+      "gas_used": 57772,
+      "gas_rate": 232161514.84464163
+    },
+    {
+      "name": "geth/micro/memory_grow_mload/by1",
+      "time_unit": "us",
+      "real_time": 247.002,
+      "cpu_time": 247.002,
+      "gas_used": 57772,
+      "gas_rate": 233892842.97293139
+    },
+    {
+      "name": "geth/micro/memory_grow_mload/by1",
+      "time_unit": "us",
+      "real_time": 249.824,
+      "cpu_time": 249.824,
+      "gas_used": 57772,
+      "gas_rate": 231250800.56359676
+    },
+    {
+      "name": "geth/micro/memory_grow_mload/by1",
+      "time_unit": "us",
+      "real_time": 254.066,
+      "cpu_time": 254.066,
+      "gas_used": 57772,
+      "gas_rate": 227389733.37636676
+    },
+    {
+      "name": "geth/micro/memory_grow_mload/by1",
+      "time_unit": "us",
+      "real_time": 249.499,
+      "cpu_time": 249.499,
+      "gas_used": 57772,
+      "gas_rate": 231552030.2686584
+    },
+    {
+      "name": "geth/micro/memory_grow_mload/by1",
+      "time_unit": "us",
+      "real_time": 251.921,
+      "cpu_time": 251.921,
+      "gas_used": 57772,
+      "gas_rate": 229325860.0910603
+    },
+    {
+      "name": "geth/micro/memory_grow_mload/by1",
+      "time_unit": "us",
+      "real_time": 254.231,
+      "cpu_time": 254.231,
+      "gas_used": 57772,
+      "gas_rate": 227242153.7892704
+    },
+    {
+      "name": "geth/micro/memory_grow_mload/by1",
+      "time_unit": "us",
+      "real_time": 295.636,
+      "cpu_time": 295.636,
+      "gas_used": 57772,
+      "gas_rate": 195415984.52150616
+    },
+    {
+      "name": "geth/micro/memory_grow_mload/by1",
+      "time_unit": "us",
+      "real_time": 262.356,
+      "cpu_time": 262.356,
+      "gas_used": 57772,
+      "gas_rate": 220204607.4799128
+    },
+    {
+      "name": "geth/micro/memory_grow_mload/by1",
+      "time_unit": "us",
+      "real_time": 268.084,
+      "cpu_time": 268.084,
+      "gas_used": 57772,
+      "gas_rate": 215499619.5222393
+    },
+    {
+      "name": "geth/micro/memory_grow_mload/by1_mean",
+      "run_type": "aggregate",
+      "aggregate_name": "mean",
+      "time_unit": "us",
+      "real_time": 258.1463,
+      "cpu_time": 258.1463,
+      "gas_used": 57772,
+      "gas_rate": 223795576.3843991
+    },
+    {
+      "name": "geth/micro/memory_grow_mload/by16",
+      "time_unit": "us",
+      "real_time": 314.1,
+      "cpu_time": 314.1,
+      "gas_used": 71700,
+      "gas_rate": 228271251.1938873
+    },
+    {
+      "name": "geth/micro/memory_grow_mload/by16",
+      "time_unit": "us",
+      "real_time": 325.962,
+      "cpu_time": 325.962,
+      "gas_used": 71700,
+      "gas_rate": 219964290.31604913
+    },
+    {
+      "name": "geth/micro/memory_grow_mload/by16",
+      "time_unit": "us",
+      "real_time": 340.145,
+      "cpu_time": 340.145,
+      "gas_used": 71700,
+      "gas_rate": 210792456.15840304
+    },
+    {
+      "name": "geth/micro/memory_grow_mload/by16",
+      "time_unit": "us",
+      "real_time": 363.092,
+      "cpu_time": 363.092,
+      "gas_used": 71700,
+      "gas_rate": 197470613.5084221
+    },
+    {
+      "name": "geth/micro/memory_grow_mload/by16",
+      "time_unit": "us",
+      "real_time": 354.803,
+      "cpu_time": 354.803,
+      "gas_used": 71700,
+      "gas_rate": 202083973.3598645
+    },
+    {
+      "name": "geth/micro/memory_grow_mload/by16",
+      "time_unit": "us",
+      "real_time": 398.846,
+      "cpu_time": 398.846,
+      "gas_used": 71700,
+      "gas_rate": 179768632.50477627
+    },
+    {
+      "name": "geth/micro/memory_grow_mload/by16",
+      "time_unit": "us",
+      "real_time": 381.801,
+      "cpu_time": 381.801,
+      "gas_used": 71700,
+      "gas_rate": 187794165.02314034
+    },
+    {
+      "name": "geth/micro/memory_grow_mload/by16",
+      "time_unit": "us",
+      "real_time": 337.543,
+      "cpu_time": 337.543,
+      "gas_used": 71700,
+      "gas_rate": 212417380.89665613
+    },
+    {
+      "name": "geth/micro/memory_grow_mload/by16",
+      "time_unit": "us",
+      "real_time": 335.848,
+      "cpu_time": 335.848,
+      "gas_used": 71700,
+      "gas_rate": 213489435.69710106
+    },
+    {
+      "name": "geth/micro/memory_grow_mload/by16",
+      "time_unit": "us",
+      "real_time": 391.893,
+      "cpu_time": 391.893,
+      "gas_used": 71700,
+      "gas_rate": 182958103.3598457
+    },
+    {
+      "name": "geth/micro/memory_grow_mload/by16_mean",
+      "run_type": "aggregate",
+      "aggregate_name": "mean",
+      "time_unit": "us",
+      "real_time": 354.4033,
+      "cpu_time": 354.4033,
+      "gas_used": 71700,
+      "gas_rate": 202311885.92205545
+    },
+    {
+      "name": "geth/micro/memory_grow_mload/by32",
+      "time_unit": "us",
+      "real_time": 444.678,
+      "cpu_time": 444.678,
+      "gas_used": 102409,
+      "gas_rate": 230299227.7558143
+    },
+    {
+      "name": "geth/micro/memory_grow_mload/by32",
+      "time_unit": "us",
+      "real_time": 479.064,
+      "cpu_time": 479.064,
+      "gas_used": 102409,
+      "gas_rate": 213768932.75220013
+    },
+    {
+      "name": "geth/micro/memory_grow_mload/by32",
+      "time_unit": "us",
+      "real_time": 483.268,
+      "cpu_time": 483.268,
+      "gas_used": 102409,
+      "gas_rate": 211909333.95134792
+    },
+    {
+      "name": "geth/micro/memory_grow_mload/by32",
+      "time_unit": "us",
+      "real_time": 435.202,
+      "cpu_time": 435.202,
+      "gas_used": 102409,
+      "gas_rate": 235313716.389171
+    },
+    {
+      "name": "geth/micro/memory_grow_mload/by32",
+      "time_unit": "us",
+      "real_time": 415.539,
+      "cpu_time": 415.539,
+      "gas_used": 102409,
+      "gas_rate": 246448588.45980763
+    },
+    {
+      "name": "geth/micro/memory_grow_mload/by32",
+      "time_unit": "us",
+      "real_time": 433.54,
+      "cpu_time": 433.54,
+      "gas_used": 102409,
+      "gas_rate": 236215804.77003273
+    },
+    {
+      "name": "geth/micro/memory_grow_mload/by32",
+      "time_unit": "us",
+      "real_time": 432.643,
+      "cpu_time": 432.643,
+      "gas_used": 102409,
+      "gas_rate": 236705551.69042376
+    },
+    {
+      "name": "geth/micro/memory_grow_mload/by32",
+      "time_unit": "us",
+      "real_time": 406.511,
+      "cpu_time": 406.511,
+      "gas_used": 102409,
+      "gas_rate": 251921842.2133718
+    },
+    {
+      "name": "geth/micro/memory_grow_mload/by32",
+      "time_unit": "us",
+      "real_time": 418.482,
+      "cpu_time": 418.482,
+      "gas_used": 102409,
+      "gas_rate": 244715423.84140775
+    },
+    {
+      "name": "geth/micro/memory_grow_mload/by32",
+      "time_unit": "us",
+      "real_time": 415.294,
+      "cpu_time": 415.294,
+      "gas_used": 102409,
+      "gas_rate": 246593979.20509326
+    },
+    {
+      "name": "geth/micro/memory_grow_mload/by32_mean",
+      "run_type": "aggregate",
+      "aggregate_name": "mean",
+      "time_unit": "us",
+      "real_time": 436.42210000000006,
+      "cpu_time": 436.42210000000006,
+      "gas_used": 102409,
+      "gas_rate": 234655852.6710723
+    },
+    {
+      "name": "geth/micro/memory_grow_mstore/nogrow",
+      "time_unit": "us",
+      "real_time": 549.278,
+      "cpu_time": 549.278,
+      "gas_used": 61452,
+      "gas_rate": 111877774.09617716
+    },
+    {
+      "name": "geth/micro/memory_grow_mstore/nogrow",
+      "time_unit": "us",
+      "real_time": 560.941,
+      "cpu_time": 560.941,
+      "gas_used": 61452,
+      "gas_rate": 109551628.42437974
+    },
+    {
+      "name": "geth/micro/memory_grow_mstore/nogrow",
+      "time_unit": "us",
+      "real_time": 549.303,
+      "cpu_time": 549.303,
+      "gas_used": 61452,
+      "gas_rate": 111872682.29010218
+    },
+    {
+      "name": "geth/micro/memory_grow_mstore/nogrow",
+      "time_unit": "us",
+      "real_time": 562.676,
+      "cpu_time": 562.676,
+      "gas_used": 61452,
+      "gas_rate": 109213828.20664111
+    },
+    {
+      "name": "geth/micro/memory_grow_mstore/nogrow",
+      "time_unit": "us",
+      "real_time": 530.635,
+      "cpu_time": 530.635,
+      "gas_used": 61452,
+      "gas_rate": 115808418.21591112
+    },
+    {
+      "name": "geth/micro/memory_grow_mstore/nogrow",
+      "time_unit": "us",
+      "real_time": 530.911,
+      "cpu_time": 530.911,
+      "gas_used": 61452,
+      "gas_rate": 115748213.9190938
+    },
+    {
+      "name": "geth/micro/memory_grow_mstore/nogrow",
+      "time_unit": "us",
+      "real_time": 530.749,
+      "cpu_time": 530.749,
+      "gas_used": 61452,
+      "gas_rate": 115783543.63361965
+    },
+    {
+      "name": "geth/micro/memory_grow_mstore/nogrow",
+      "time_unit": "us",
+      "real_time": 529.58,
+      "cpu_time": 529.58,
+      "gas_used": 61452,
+      "gas_rate": 116039125.3446127
+    },
+    {
+      "name": "geth/micro/memory_grow_mstore/nogrow",
+      "time_unit": "us",
+      "real_time": 522.92,
+      "cpu_time": 522.92,
+      "gas_used": 61452,
+      "gas_rate": 117517019.81182592
+    },
+    {
+      "name": "geth/micro/memory_grow_mstore/nogrow",
+      "time_unit": "us",
+      "real_time": 543.78,
+      "cpu_time": 543.78,
+      "gas_used": 61452,
+      "gas_rate": 113008937.43793446
+    },
+    {
+      "name": "geth/micro/memory_grow_mstore/nogrow_mean",
+      "run_type": "aggregate",
+      "aggregate_name": "mean",
+      "time_unit": "us",
+      "real_time": 541.0772999999999,
+      "cpu_time": 541.0772999999999,
+      "gas_used": 61452,
+      "gas_rate": 113573421.02505504
+    },
+    {
+      "name": "geth/micro/memory_grow_mstore/by1",
+      "time_unit": "us",
+      "real_time": 539.111,
+      "cpu_time": 539.111,
+      "gas_used": 61868,
+      "gas_rate": 114759298.17792626
+    },
+    {
+      "name": "geth/micro/memory_grow_mstore/by1",
+      "time_unit": "us",
+      "real_time": 522.191,
+      "cpu_time": 522.191,
+      "gas_used": 61868,
+      "gas_rate": 118477721.75315161
+    },
+    {
+      "name": "geth/micro/memory_grow_mstore/by1",
+      "time_unit": "us",
+      "real_time": 521.762,
+      "cpu_time": 521.762,
+      "gas_used": 61868,
+      "gas_rate": 118575135.78988123
+    },
+    {
+      "name": "geth/micro/memory_grow_mstore/by1",
+      "time_unit": "us",
+      "real_time": 527.618,
+      "cpu_time": 527.618,
+      "gas_used": 61868,
+      "gas_rate": 117259077.59022625
+    },
+    {
+      "name": "geth/micro/memory_grow_mstore/by1",
+      "time_unit": "us",
+      "real_time": 527.588,
+      "cpu_time": 527.588,
+      "gas_used": 61868,
+      "gas_rate": 117265745.24060442
+    },
+    {
+      "name": "geth/micro/memory_grow_mstore/by1",
+      "time_unit": "us",
+      "real_time": 504.375,
+      "cpu_time": 504.375,
+      "gas_used": 61868,
+      "gas_rate": 122662701.36307311
+    },
+    {
+      "name": "geth/micro/memory_grow_mstore/by1",
+      "time_unit": "us",
+      "real_time": 517.122,
+      "cpu_time": 517.122,
+      "gas_used": 61868,
+      "gas_rate": 119639079.3661844
+    },
+    {
+      "name": "geth/micro/memory_grow_mstore/by1",
+      "time_unit": "us",
+      "real_time": 513.457,
+      "cpu_time": 513.457,
+      "gas_used": 61868,
+      "gas_rate": 120493050.0509293
+    },
+    {
+      "name": "geth/micro/memory_grow_mstore/by1",
+      "time_unit": "us",
+      "real_time": 525.382,
+      "cpu_time": 525.382,
+      "gas_used": 61868,
+      "gas_rate": 117758126.4679795
+    },
+    {
+      "name": "geth/micro/memory_grow_mstore/by1",
+      "time_unit": "us",
+      "real_time": 529.39,
+      "cpu_time": 529.39,
+      "gas_used": 61868,
+      "gas_rate": 116866582.29282759
+    },
+    {
+      "name": "geth/micro/memory_grow_mstore/by1_mean",
+      "run_type": "aggregate",
+      "aggregate_name": "mean",
+      "time_unit": "us",
+      "real_time": 522.7996,
+      "cpu_time": 522.7996,
+      "gas_used": 61868,
+      "gas_rate": 118339799.80091797
+    },
+    {
+      "name": "geth/micro/memory_grow_mstore/by16",
+      "time_unit": "us",
+      "real_time": 590.519,
+      "cpu_time": 590.519,
+      "gas_used": 75796,
+      "gas_rate": 128354887.81902021
+    },
+    {
+      "name": "geth/micro/memory_grow_mstore/by16",
+      "time_unit": "us",
+      "real_time": 593.712,
+      "cpu_time": 593.712,
+      "gas_used": 75796,
+      "gas_rate": 127664591.58649312
+    },
+    {
+      "name": "geth/micro/memory_grow_mstore/by16",
+      "time_unit": "us",
+      "real_time": 589.787,
+      "cpu_time": 589.787,
+      "gas_used": 75796,
+      "gas_rate": 128514192.4118368
+    },
+    {
+      "name": "geth/micro/memory_grow_mstore/by16",
+      "time_unit": "us",
+      "real_time": 591.4,
+      "cpu_time": 591.4,
+      "gas_used": 75796,
+      "gas_rate": 128163679.40480217
+    },
+    {
+      "name": "geth/micro/memory_grow_mstore/by16",
+      "time_unit": "us",
+      "real_time": 594.059,
+      "cpu_time": 594.059,
+      "gas_used": 75796,
+      "gas_rate": 127590020.51984736
+    },
+    {
+      "name": "geth/micro/memory_grow_mstore/by16",
+      "time_unit": "us",
+      "real_time": 583.875,
+      "cpu_time": 583.875,
+      "gas_used": 75796,
+      "gas_rate": 129815457.07557268
+    },
+    {
+      "name": "geth/micro/memory_grow_mstore/by16",
+      "time_unit": "us",
+      "real_time": 618.262,
+      "cpu_time": 618.262,
+      "gas_used": 75796,
+      "gas_rate": 122595275.14225362
+    },
+    {
+      "name": "geth/micro/memory_grow_mstore/by16",
+      "time_unit": "us",
+      "real_time": 608.329,
+      "cpu_time": 608.329,
+      "gas_used": 75796,
+      "gas_rate": 124597051.9242055
+    },
+    {
+      "name": "geth/micro/memory_grow_mstore/by16",
+      "time_unit": "us",
+      "real_time": 583.311,
+      "cpu_time": 583.311,
+      "gas_used": 75796,
+      "gas_rate": 129940974.88303837
+    },
+    {
+      "name": "geth/micro/memory_grow_mstore/by16",
+      "time_unit": "us",
+      "real_time": 596.368,
+      "cpu_time": 596.368,
+      "gas_used": 75796,
+      "gas_rate": 127096021.248625
+    },
+    {
+      "name": "geth/micro/memory_grow_mstore/by16_mean",
+      "run_type": "aggregate",
+      "aggregate_name": "mean",
+      "time_unit": "us",
+      "real_time": 594.9621999999999,
+      "cpu_time": 594.9621999999999,
+      "gas_used": 75796,
+      "gas_rate": 127396328.70794146
+    },
+    {
+      "name": "geth/micro/memory_grow_mstore/by32",
+      "time_unit": "us",
+      "real_time": 642.592,
+      "cpu_time": 642.592,
+      "gas_used": 106505,
+      "gas_rate": 165742804.14321998
+    },
+    {
+      "name": "geth/micro/memory_grow_mstore/by32",
+      "time_unit": "us",
+      "real_time": 637.804,
+      "cpu_time": 637.804,
+      "gas_used": 106505,
+      "gas_rate": 166987036.76991677
+    },
+    {
+      "name": "geth/micro/memory_grow_mstore/by32",
+      "time_unit": "us",
+      "real_time": 642.789,
+      "cpu_time": 642.789,
+      "gas_used": 106505,
+      "gas_rate": 165692007.79727095
+    },
+    {
+      "name": "geth/micro/memory_grow_mstore/by32",
+      "time_unit": "us",
+      "real_time": 642.615,
+      "cpu_time": 642.615,
+      "gas_used": 106505,
+      "gas_rate": 165736871.9995643
+    },
+    {
+      "name": "geth/micro/memory_grow_mstore/by32",
+      "time_unit": "us",
+      "real_time": 653.493,
+      "cpu_time": 653.493,
+      "gas_used": 106505,
+      "gas_rate": 162978027.30863222
+    },
+    {
+      "name": "geth/micro/memory_grow_mstore/by32",
+      "time_unit": "us",
+      "real_time": 691.317,
+      "cpu_time": 691.317,
+      "gas_used": 106505,
+      "gas_rate": 154061016.87069753
+    },
+    {
+      "name": "geth/micro/memory_grow_mstore/by32",
+      "time_unit": "us",
+      "real_time": 625.939,
+      "cpu_time": 625.939,
+      "gas_used": 106505,
+      "gas_rate": 170152363.08969405
+    },
+    {
+      "name": "geth/micro/memory_grow_mstore/by32",
+      "time_unit": "us",
+      "real_time": 671.39,
+      "cpu_time": 671.39,
+      "gas_used": 106505,
+      "gas_rate": 158633581.07806194
+    },
+    {
+      "name": "geth/micro/memory_grow_mstore/by32",
+      "time_unit": "us",
+      "real_time": 702.231,
+      "cpu_time": 702.231,
+      "gas_used": 106505,
+      "gas_rate": 151666616.82551754
+    },
+    {
+      "name": "geth/micro/memory_grow_mstore/by32",
+      "time_unit": "us",
+      "real_time": 653.949,
+      "cpu_time": 653.949,
+      "gas_used": 106505,
+      "gas_rate": 162864382.39067572
+    },
+    {
+      "name": "geth/micro/memory_grow_mstore/by32_mean",
+      "run_type": "aggregate",
+      "aggregate_name": "mean",
+      "time_unit": "us",
+      "real_time": 656.4119,
+      "cpu_time": 656.4119,
+      "gas_used": 106505,
+      "gas_rate": 162253304.67043635
+    },
+    {
+      "name": "geth/main/blake2b_huff/empty",
+      "time_unit": "us",
+      "real_time": 119.038,
+      "cpu_time": 119.038,
+      "gas_used": 13984,
+      "gas_rate": 117475091.98743258
+    },
+    {
+      "name": "geth/main/blake2b_huff/empty",
+      "time_unit": "us",
+      "real_time": 120.936,
+      "cpu_time": 120.936,
+      "gas_used": 13984,
+      "gas_rate": 115631408.34821723
+    },
+    {
+      "name": "geth/main/blake2b_huff/empty",
+      "time_unit": "us",
+      "real_time": 130.784,
+      "cpu_time": 130.784,
+      "gas_used": 13984,
+      "gas_rate": 106924394.42133595
+    },
+    {
+      "name": "geth/main/blake2b_huff/empty",
+      "time_unit": "us",
+      "real_time": 128.686,
+      "cpu_time": 128.686,
+      "gas_used": 13984,
+      "gas_rate": 108667609.53017421
+    },
+    {
+      "name": "geth/main/blake2b_huff/empty",
+      "time_unit": "us",
+      "real_time": 127.057,
+      "cpu_time": 127.057,
+      "gas_used": 13984,
+      "gas_rate": 110060838.83611292
+    },
+    {
+      "name": "geth/main/blake2b_huff/empty",
+      "time_unit": "us",
+      "real_time": 128.649,
+      "cpu_time": 128.649,
+      "gas_used": 13984,
+      "gas_rate": 108698862.79722345
+    },
+    {
+      "name": "geth/main/blake2b_huff/empty",
+      "time_unit": "us",
+      "real_time": 123.04,
+      "cpu_time": 123.04,
+      "gas_used": 13984,
+      "gas_rate": 113654096.22886865
+    },
+    {
+      "name": "geth/main/blake2b_huff/empty",
+      "time_unit": "us",
+      "real_time": 134.889,
+      "cpu_time": 134.889,
+      "gas_used": 13984,
+      "gas_rate": 103670425.31266448
+    },
+    {
+      "name": "geth/main/blake2b_huff/empty",
+      "time_unit": "us",
+      "real_time": 125.607,
+      "cpu_time": 125.607,
+      "gas_used": 13984,
+      "gas_rate": 111331374.8437587
+    },
+    {
+      "name": "geth/main/blake2b_huff/empty",
+      "time_unit": "us",
+      "real_time": 132.093,
+      "cpu_time": 132.093,
+      "gas_used": 13984,
+      "gas_rate": 105864807.37056468
+    },
+    {
+      "name": "geth/main/blake2b_huff/empty_mean",
+      "run_type": "aggregate",
+      "aggregate_name": "mean",
+      "time_unit": "us",
+      "real_time": 127.0779,
+      "cpu_time": 127.0779,
+      "gas_used": 13984,
+      "gas_rate": 110042737.56491098
+    },
+    {
+      "name": "geth/main/blake2b_huff/2805nulls",
+      "time_unit": "us",
+      "real_time": 2757.462,
+      "cpu_time": 2757.462,
+      "gas_used": 307068,
+      "gas_rate": 111358923.53185646
+    },
+    {
+      "name": "geth/main/blake2b_huff/2805nulls",
+      "time_unit": "us",
+      "real_time": 2501.381,
+      "cpu_time": 2501.381,
+      "gas_used": 307068,
+      "gas_rate": 122759387.71422666
+    },
+    {
+      "name": "geth/main/blake2b_huff/2805nulls",
+      "time_unit": "us",
+      "real_time": 2555.717,
+      "cpu_time": 2555.717,
+      "gas_used": 307068,
+      "gas_rate": 120149453.16715427
+    },
+    {
+      "name": "geth/main/blake2b_huff/2805nulls",
+      "time_unit": "us",
+      "real_time": 2422.3590000000004,
+      "cpu_time": 2422.3590000000004,
+      "gas_used": 307068,
+      "gas_rate": 126764034.56300241
+    },
+    {
+      "name": "geth/main/blake2b_huff/2805nulls",
+      "time_unit": "us",
+      "real_time": 2468.799,
+      "cpu_time": 2468.799,
+      "gas_used": 307068,
+      "gas_rate": 124379505.98651409
+    },
+    {
+      "name": "geth/main/blake2b_huff/2805nulls",
+      "time_unit": "us",
+      "real_time": 2623.52,
+      "cpu_time": 2623.52,
+      "gas_used": 307068,
+      "gas_rate": 117044276.39202294
+    },
+    {
+      "name": "geth/main/blake2b_huff/2805nulls",
+      "time_unit": "us",
+      "real_time": 2371.829,
+      "cpu_time": 2371.829,
+      "gas_used": 307068,
+      "gas_rate": 129464645.21683477
+    },
+    {
+      "name": "geth/main/blake2b_huff/2805nulls",
+      "time_unit": "us",
+      "real_time": 2437.329,
+      "cpu_time": 2437.329,
+      "gas_used": 307068,
+      "gas_rate": 125985453.74875529
+    },
+    {
+      "name": "geth/main/blake2b_huff/2805nulls",
+      "time_unit": "us",
+      "real_time": 2376.107,
+      "cpu_time": 2376.107,
+      "gas_used": 307068,
+      "gas_rate": 129231553.9662145
+    },
+    {
+      "name": "geth/main/blake2b_huff/2805nulls",
+      "time_unit": "us",
+      "real_time": 2431.075,
+      "cpu_time": 2431.075,
+      "gas_used": 307068,
+      "gas_rate": 126309554.41522785
+    },
+    {
+      "name": "geth/main/blake2b_huff/2805nulls_mean",
+      "run_type": "aggregate",
+      "aggregate_name": "mean",
+      "time_unit": "us",
+      "real_time": 2494.5578000000005,
+      "cpu_time": 2494.5578000000005,
+      "gas_used": 307068,
+      "gas_rate": 123095163.39930065
+    },
+    {
+      "name": "geth/main/blake2b_huff/5610nulls",
+      "time_unit": "us",
+      "real_time": 4739.747,
+      "cpu_time": 4739.747,
+      "gas_used": 600152,
+      "gas_rate": 126621104.459795
+    },
+    {
+      "name": "geth/main/blake2b_huff/5610nulls",
+      "time_unit": "us",
+      "real_time": 4762.215999999999,
+      "cpu_time": 4762.215999999999,
+      "gas_used": 600152,
+      "gas_rate": 126023683.09207311
+    },
+    {
+      "name": "geth/main/blake2b_huff/5610nulls",
+      "time_unit": "us",
+      "real_time": 4858.273999999999,
+      "cpu_time": 4858.273999999999,
+      "gas_used": 600152,
+      "gas_rate": 123531937.4740906
+    },
+    {
+      "name": "geth/main/blake2b_huff/5610nulls",
+      "time_unit": "us",
+      "real_time": 4822.732,
+      "cpu_time": 4822.732,
+      "gas_used": 600152,
+      "gas_rate": 124442328.53909361
+    },
+    {
+      "name": "geth/main/blake2b_huff/5610nulls",
+      "time_unit": "us",
+      "real_time": 5288.651,
+      "cpu_time": 5288.651,
+      "gas_used": 600152,
+      "gas_rate": 113479221.82802382
+    },
+    {
+      "name": "geth/main/blake2b_huff/5610nulls",
+      "time_unit": "us",
+      "real_time": 4665.482,
+      "cpu_time": 4665.482,
+      "gas_used": 600152,
+      "gas_rate": 128636655.33378974
+    },
+    {
+      "name": "geth/main/blake2b_huff/5610nulls",
+      "time_unit": "us",
+      "real_time": 4598.396,
+      "cpu_time": 4598.396,
+      "gas_used": 600152,
+      "gas_rate": 130513335.51960292
+    },
+    {
+      "name": "geth/main/blake2b_huff/5610nulls",
+      "time_unit": "us",
+      "real_time": 4714.964,
+      "cpu_time": 4714.964,
+      "gas_used": 600152,
+      "gas_rate": 127286655.84721325
+    },
+    {
+      "name": "geth/main/blake2b_huff/5610nulls",
+      "time_unit": "us",
+      "real_time": 5290.204,
+      "cpu_time": 5290.204,
+      "gas_used": 600152,
+      "gas_rate": 113445908.7021975
+    },
+    {
+      "name": "geth/main/blake2b_huff/5610nulls",
+      "time_unit": "us",
+      "real_time": 4754.252,
+      "cpu_time": 4754.252,
+      "gas_used": 600152,
+      "gas_rate": 126234789.40535755
+    },
+    {
+      "name": "geth/main/blake2b_huff/5610nulls_mean",
+      "run_type": "aggregate",
+      "aggregate_name": "mean",
+      "time_unit": "us",
+      "real_time": 4849.491799999999,
+      "cpu_time": 4849.491799999999,
+      "gas_used": 600152,
+      "gas_rate": 123755647.9629474
+    },
+    {
+      "name": "geth/main/blake2b_huff/8415nulls",
+      "time_unit": "us",
+      "real_time": 6750.634,
+      "cpu_time": 6750.634,
+      "gas_used": 879923,
+      "gas_rate": 130346720.02659306
+    },
+    {
+      "name": "geth/main/blake2b_huff/8415nulls",
+      "time_unit": "us",
+      "real_time": 8115.747,
+      "cpu_time": 8115.747,
+      "gas_used": 879923,
+      "gas_rate": 108421689.34048831
+    },
+    {
+      "name": "geth/main/blake2b_huff/8415nulls",
+      "time_unit": "us",
+      "real_time": 6847.228999999999,
+      "cpu_time": 6847.228999999999,
+      "gas_used": 879923,
+      "gas_rate": 128507897.13619919
+    },
+    {
+      "name": "geth/main/blake2b_huff/8415nulls",
+      "time_unit": "us",
+      "real_time": 6847.111,
+      "cpu_time": 6847.111,
+      "gas_used": 879923,
+      "gas_rate": 128510111.78291108
+    },
+    {
+      "name": "geth/main/blake2b_huff/8415nulls",
+      "time_unit": "us",
+      "real_time": 7010.133,
+      "cpu_time": 7010.133,
+      "gas_used": 879923,
+      "gas_rate": 125521584.2552488
+    },
+    {
+      "name": "geth/main/blake2b_huff/8415nulls",
+      "time_unit": "us",
+      "real_time": 7012.8009999999995,
+      "cpu_time": 7012.8009999999995,
+      "gas_used": 879923,
+      "gas_rate": 125473829.92901126
+    },
+    {
+      "name": "geth/main/blake2b_huff/8415nulls",
+      "time_unit": "us",
+      "real_time": 6929.834,
+      "cpu_time": 6929.834,
+      "gas_used": 879923,
+      "gas_rate": 126976057.43514203
+    },
+    {
+      "name": "geth/main/blake2b_huff/8415nulls",
+      "time_unit": "us",
+      "real_time": 6852.085,
+      "cpu_time": 6852.085,
+      "gas_used": 879923,
+      "gas_rate": 128416824.95182124
+    },
+    {
+      "name": "geth/main/blake2b_huff/8415nulls",
+      "time_unit": "us",
+      "real_time": 7144.844,
+      "cpu_time": 7144.844,
+      "gas_used": 879923,
+      "gas_rate": 123154963.21543199
+    },
+    {
+      "name": "geth/main/blake2b_huff/8415nulls",
+      "time_unit": "us",
+      "real_time": 6727.871,
+      "cpu_time": 6727.871,
+      "gas_used": 879923,
+      "gas_rate": 130787733.59358406
+    },
+    {
+      "name": "geth/main/blake2b_huff/8415nulls_mean",
+      "run_type": "aggregate",
+      "aggregate_name": "mean",
+      "time_unit": "us",
+      "real_time": 7023.8289,
+      "cpu_time": 7023.8289,
+      "gas_used": 879923,
+      "gas_rate": 125276827.2871795
+    },
+    {
+      "name": "geth/main/sha1_divs/empty",
+      "time_unit": "us",
+      "real_time": 253.369,
+      "cpu_time": 253.369,
+      "gas_used": 36454,
+      "gas_rate": 143877112.0381736
+    },
+    {
+      "name": "geth/main/sha1_divs/empty",
+      "time_unit": "us",
+      "real_time": 263.935,
+      "cpu_time": 263.935,
+      "gas_used": 36454,
+      "gas_rate": 138117339.49646693
+    },
+    {
+      "name": "geth/main/sha1_divs/empty",
+      "time_unit": "us",
+      "real_time": 272.469,
+      "cpu_time": 272.469,
+      "gas_used": 36454,
+      "gas_rate": 133791367.09130213
+    },
+    {
+      "name": "geth/main/sha1_divs/empty",
+      "time_unit": "us",
+      "real_time": 267.228,
+      "cpu_time": 267.228,
+      "gas_used": 36454,
+      "gas_rate": 136415345.69730717
+    },
+    {
+      "name": "geth/main/sha1_divs/empty",
+      "time_unit": "us",
+      "real_time": 283.797,
+      "cpu_time": 283.797,
+      "gas_used": 36454,
+      "gas_rate": 128450970.2357671
+    },
+    {
+      "name": "geth/main/sha1_divs/empty",
+      "time_unit": "us",
+      "real_time": 267.267,
+      "cpu_time": 267.267,
+      "gas_used": 36454,
+      "gas_rate": 136395439.7662263
+    },
+    {
+      "name": "geth/main/sha1_divs/empty",
+      "time_unit": "us",
+      "real_time": 264.112,
+      "cpu_time": 264.112,
+      "gas_used": 36454,
+      "gas_rate": 138024777.36717755
+    },
+    {
+      "name": "geth/main/sha1_divs/empty",
+      "time_unit": "us",
+      "real_time": 272.683,
+      "cpu_time": 272.683,
+      "gas_used": 36454,
+      "gas_rate": 133686368.42047359
+    },
+    {
+      "name": "geth/main/sha1_divs/empty",
+      "time_unit": "us",
+      "real_time": 263.355,
+      "cpu_time": 263.355,
+      "gas_used": 36454,
+      "gas_rate": 138421522.27981243
+    },
+    {
+      "name": "geth/main/sha1_divs/empty",
+      "time_unit": "us",
+      "real_time": 268.243,
+      "cpu_time": 268.243,
+      "gas_used": 36454,
+      "gas_rate": 135899166.0546594
+    },
+    {
+      "name": "geth/main/sha1_divs/empty_mean",
+      "run_type": "aggregate",
+      "aggregate_name": "mean",
+      "time_unit": "us",
+      "real_time": 267.6458,
+      "cpu_time": 267.6458,
+      "gas_used": 36454,
+      "gas_rate": 136202398.84205168
+    },
+    {
+      "name": "geth/main/sha1_divs/1351",
+      "time_unit": "us",
+      "real_time": 5408.343000000001,
+      "cpu_time": 5408.343000000001,
+      "gas_used": 786454,
+      "gas_rate": 145414963.5110051
+    },
+    {
+      "name": "geth/main/sha1_divs/1351",
+      "time_unit": "us",
+      "real_time": 5279.1050000000005,
+      "cpu_time": 5279.1050000000005,
+      "gas_used": 786454,
+      "gas_rate": 148974873.58179083
+    },
+    {
+      "name": "geth/main/sha1_divs/1351",
+      "time_unit": "us",
+      "real_time": 5281.481000000001,
+      "cpu_time": 5281.481000000001,
+      "gas_used": 786454,
+      "gas_rate": 148907853.68725172
+    },
+    {
+      "name": "geth/main/sha1_divs/1351",
+      "time_unit": "us",
+      "real_time": 5438.615000000001,
+      "cpu_time": 5438.615000000001,
+      "gas_used": 786454,
+      "gas_rate": 144605565.93912235
+    },
+    {
+      "name": "geth/main/sha1_divs/1351",
+      "time_unit": "us",
+      "real_time": 5313.17,
+      "cpu_time": 5313.17,
+      "gas_used": 786454,
+      "gas_rate": 148019732.0996693
+    },
+    {
+      "name": "geth/main/sha1_divs/1351",
+      "time_unit": "us",
+      "real_time": 5396.842000000001,
+      "cpu_time": 5396.842000000001,
+      "gas_used": 786454,
+      "gas_rate": 145724851.6817798
+    },
+    {
+      "name": "geth/main/sha1_divs/1351",
+      "time_unit": "us",
+      "real_time": 5191.455,
+      "cpu_time": 5191.455,
+      "gas_used": 786454,
+      "gas_rate": 151490092.85450804
+    },
+    {
+      "name": "geth/main/sha1_divs/1351",
+      "time_unit": "us",
+      "real_time": 5364.348,
+      "cpu_time": 5364.348,
+      "gas_used": 786454,
+      "gas_rate": 146607565.35556605
+    },
+    {
+      "name": "geth/main/sha1_divs/1351",
+      "time_unit": "us",
+      "real_time": 5382.504,
+      "cpu_time": 5382.504,
+      "gas_used": 786454,
+      "gas_rate": 146113035.86583495
+    },
+    {
+      "name": "geth/main/sha1_divs/1351",
+      "time_unit": "us",
+      "real_time": 5900.509999999999,
+      "cpu_time": 5900.509999999999,
+      "gas_used": 786454,
+      "gas_rate": 133285766.82354578
+    },
+    {
+      "name": "geth/main/sha1_divs/1351_mean",
+      "run_type": "aggregate",
+      "aggregate_name": "mean",
+      "time_unit": "us",
+      "real_time": 5395.6373,
+      "cpu_time": 5395.6373,
+      "gas_used": 786454,
+      "gas_rate": 145757388.10316253
+    },
+    {
+      "name": "geth/main/sha1_divs/2737",
+      "time_unit": "us",
+      "real_time": 10378.859999999999,
+      "cpu_time": 10378.859999999999,
+      "gas_used": 1536375,
+      "gas_rate": 148029263.32949862
+    },
+    {
+      "name": "geth/main/sha1_divs/2737",
+      "time_unit": "us",
+      "real_time": 10259.835000000001,
+      "cpu_time": 10259.835000000001,
+      "gas_used": 1536375,
+      "gas_rate": 149746560.25169995
+    },
+    {
+      "name": "geth/main/sha1_divs/2737",
+      "time_unit": "us",
+      "real_time": 10231.439999999999,
+      "cpu_time": 10231.439999999999,
+      "gas_used": 1536375,
+      "gas_rate": 150162147.2637283
+    },
+    {
+      "name": "geth/main/sha1_divs/2737",
+      "time_unit": "us",
+      "real_time": 11106.48,
+      "cpu_time": 11106.48,
+      "gas_used": 1536375,
+      "gas_rate": 138331406.53024182
+    },
+    {
+      "name": "geth/main/sha1_divs/2737",
+      "time_unit": "us",
+      "real_time": 11424.322999999999,
+      "cpu_time": 11424.322999999999,
+      "gas_used": 1536375,
+      "gas_rate": 134482804.80164996
+    },
+    {
+      "name": "geth/main/sha1_divs/2737",
+      "time_unit": "us",
+      "real_time": 10940.132,
+      "cpu_time": 10940.132,
+      "gas_used": 1536375,
+      "gas_rate": 140434777.20378512
+    },
+    {
+      "name": "geth/main/sha1_divs/2737",
+      "time_unit": "us",
+      "real_time": 10813.046,
+      "cpu_time": 10813.046,
+      "gas_used": 1536375,
+      "gas_rate": 142085310.65159622
+    },
+    {
+      "name": "geth/main/sha1_divs/2737",
+      "time_unit": "us",
+      "real_time": 10651.222,
+      "cpu_time": 10651.222,
+      "gas_used": 1536375,
+      "gas_rate": 144244012.56494325
+    },
+    {
+      "name": "geth/main/sha1_divs/2737",
+      "time_unit": "us",
+      "real_time": 10261.811,
+      "cpu_time": 10261.811,
+      "gas_used": 1536375,
+      "gas_rate": 149717725.2631139
+    },
+    {
+      "name": "geth/main/sha1_divs/2737",
+      "time_unit": "us",
+      "real_time": 10046.542000000001,
+      "cpu_time": 10046.542000000001,
+      "gas_used": 1536375,
+      "gas_rate": 152925752.9605709
+    },
+    {
+      "name": "geth/main/sha1_divs/2737_mean",
+      "run_type": "aggregate",
+      "aggregate_name": "mean",
+      "time_unit": "us",
+      "real_time": 10611.3691,
+      "cpu_time": 10611.3691,
+      "gas_used": 1536375,
+      "gas_rate": 144785746.82695752
+    },
+    {
+      "name": "geth/main/sha1_divs/5311",
+      "time_unit": "us",
+      "real_time": 20357.505,
+      "cpu_time": 20357.505,
+      "gas_used": 3000286,
+      "gas_rate": 147379848.3655045
+    },
+    {
+      "name": "geth/main/sha1_divs/5311",
+      "time_unit": "us",
+      "real_time": 20354.666,
+      "cpu_time": 20354.666,
+      "gas_used": 3000286,
+      "gas_rate": 147400404.4085027
+    },
+    {
+      "name": "geth/main/sha1_divs/5311",
+      "time_unit": "us",
+      "real_time": 19656.664,
+      "cpu_time": 19656.664,
+      "gas_used": 3000286,
+      "gas_rate": 152634546.73692343
+    },
+    {
+      "name": "geth/main/sha1_divs/5311",
+      "time_unit": "us",
+      "real_time": 20195.14,
+      "cpu_time": 20195.14,
+      "gas_used": 3000286,
+      "gas_rate": 148564753.698167
+    },
+    {
+      "name": "geth/main/sha1_divs/5311",
+      "time_unit": "us",
+      "real_time": 19814.804,
+      "cpu_time": 19814.804,
+      "gas_used": 3000286,
+      "gas_rate": 151416385.44595242
+    },
+    {
+      "name": "geth/main/sha1_divs/5311",
+      "time_unit": "us",
+      "real_time": 19763.206000000002,
+      "cpu_time": 19763.206000000002,
+      "gas_used": 3000286,
+      "gas_rate": 151811705.04421195
+    },
+    {
+      "name": "geth/main/sha1_divs/5311",
+      "time_unit": "us",
+      "real_time": 19839.609,
+      "cpu_time": 19839.609,
+      "gas_used": 3000286,
+      "gas_rate": 151227073.07386956
+    },
+    {
+      "name": "geth/main/sha1_divs/5311",
+      "time_unit": "us",
+      "real_time": 20097.777000000002,
+      "cpu_time": 20097.777000000002,
+      "gas_used": 3000286,
+      "gas_rate": 149284470.6158298
+    },
+    {
+      "name": "geth/main/sha1_divs/5311",
+      "time_unit": "us",
+      "real_time": 19661.551,
+      "cpu_time": 19661.551,
+      "gas_used": 3000286,
+      "gas_rate": 152596608.4771237
+    },
+    {
+      "name": "geth/main/sha1_divs/5311",
+      "time_unit": "us",
+      "real_time": 20079.182,
+      "cpu_time": 20079.182,
+      "gas_used": 3000286,
+      "gas_rate": 149422720.5072398
+    },
+    {
+      "name": "geth/main/sha1_divs/5311_mean",
+      "run_type": "aggregate",
+      "aggregate_name": "mean",
+      "time_unit": "us",
+      "real_time": 19982.010400000003,
+      "cpu_time": 19982.010400000003,
+      "gas_used": 3000286,
+      "gas_rate": 150149356.34304342
+    },
+    {
+      "name": "geth/main/sha1_shifts/empty",
+      "time_unit": "us",
+      "real_time": 203.997,
+      "cpu_time": 203.997,
+      "gas_used": 35234,
+      "gas_rate": 172718226.24842522
+    },
+    {
+      "name": "geth/main/sha1_shifts/empty",
+      "time_unit": "us",
+      "real_time": 195.878,
+      "cpu_time": 195.878,
+      "gas_used": 35234,
+      "gas_rate": 179877270.54595208
+    },
+    {
+      "name": "geth/main/sha1_shifts/empty",
+      "time_unit": "us",
+      "real_time": 197.794,
+      "cpu_time": 197.794,
+      "gas_used": 35234,
+      "gas_rate": 178134827.1433916
+    },
+    {
+      "name": "geth/main/sha1_shifts/empty",
+      "time_unit": "us",
+      "real_time": 205.68,
+      "cpu_time": 205.68,
+      "gas_used": 35234,
+      "gas_rate": 171304939.71217424
+    },
+    {
+      "name": "geth/main/sha1_shifts/empty",
+      "time_unit": "us",
+      "real_time": 203.512,
+      "cpu_time": 203.512,
+      "gas_used": 35234,
+      "gas_rate": 173129840.00943434
+    },
+    {
+      "name": "geth/main/sha1_shifts/empty",
+      "time_unit": "us",
+      "real_time": 200.808,
+      "cpu_time": 200.808,
+      "gas_used": 35234,
+      "gas_rate": 175461137.00649378
+    },
+    {
+      "name": "geth/main/sha1_shifts/empty",
+      "time_unit": "us",
+      "real_time": 201.658,
+      "cpu_time": 201.658,
+      "gas_used": 35234,
+      "gas_rate": 174721558.28184354
+    },
+    {
+      "name": "geth/main/sha1_shifts/empty",
+      "time_unit": "us",
+      "real_time": 202.348,
+      "cpu_time": 202.348,
+      "gas_used": 35234,
+      "gas_rate": 174125763.53608632
+    },
+    {
+      "name": "geth/main/sha1_shifts/empty",
+      "time_unit": "us",
+      "real_time": 202.187,
+      "cpu_time": 202.187,
+      "gas_used": 35234,
+      "gas_rate": 174264418.5827971
+    },
+    {
+      "name": "geth/main/sha1_shifts/empty",
+      "time_unit": "us",
+      "real_time": 196.96,
+      "cpu_time": 196.96,
+      "gas_used": 35234,
+      "gas_rate": 178889114.54102355
+    },
+    {
+      "name": "geth/main/sha1_shifts/empty_mean",
+      "run_type": "aggregate",
+      "aggregate_name": "mean",
+      "time_unit": "us",
+      "real_time": 201.08219999999997,
+      "cpu_time": 201.08219999999997,
+      "gas_used": 35234,
+      "gas_rate": 175221874.43741915
+    },
+    {
+      "name": "geth/main/sha1_shifts/1351",
+      "time_unit": "us",
+      "real_time": 4269.805,
+      "cpu_time": 4269.805,
+      "gas_used": 759785,
+      "gas_rate": 177943723.42530864
+    },
+    {
+      "name": "geth/main/sha1_shifts/1351",
+      "time_unit": "us",
+      "real_time": 4344.422,
+      "cpu_time": 4344.422,
+      "gas_used": 759785,
+      "gas_rate": 174887476.40077323
+    },
+    {
+      "name": "geth/main/sha1_shifts/1351",
+      "time_unit": "us",
+      "real_time": 4288.705,
+      "cpu_time": 4288.705,
+      "gas_used": 759785,
+      "gas_rate": 177159538.83514953
+    },
+    {
+      "name": "geth/main/sha1_shifts/1351",
+      "time_unit": "us",
+      "real_time": 4225.339,
+      "cpu_time": 4225.339,
+      "gas_used": 759785,
+      "gas_rate": 179816341.36337936
+    },
+    {
+      "name": "geth/main/sha1_shifts/1351",
+      "time_unit": "us",
+      "real_time": 4291.343000000001,
+      "cpu_time": 4291.343000000001,
+      "gas_used": 759785,
+      "gas_rate": 177050634.26531038
+    },
+    {
+      "name": "geth/main/sha1_shifts/1351",
+      "time_unit": "us",
+      "real_time": 4217.467,
+      "cpu_time": 4217.467,
+      "gas_used": 759785,
+      "gas_rate": 180151972.73624194
+    },
+    {
+      "name": "geth/main/sha1_shifts/1351",
+      "time_unit": "us",
+      "real_time": 4369.717,
+      "cpu_time": 4369.717,
+      "gas_used": 759785,
+      "gas_rate": 173875104.49761394
+    },
+    {
+      "name": "geth/main/sha1_shifts/1351",
+      "time_unit": "us",
+      "real_time": 4272.932,
+      "cpu_time": 4272.932,
+      "gas_used": 759785,
+      "gas_rate": 177813501.36159435
+    },
+    {
+      "name": "geth/main/sha1_shifts/1351",
+      "time_unit": "us",
+      "real_time": 4201.055,
+      "cpu_time": 4201.055,
+      "gas_used": 759785,
+      "gas_rate": 180855761.23140496
+    },
+    {
+      "name": "geth/main/sha1_shifts/1351",
+      "time_unit": "us",
+      "real_time": 4275.282,
+      "cpu_time": 4275.282,
+      "gas_used": 759785,
+      "gas_rate": 177715762.37544096
+    },
+    {
+      "name": "geth/main/sha1_shifts/1351_mean",
+      "run_type": "aggregate",
+      "aggregate_name": "mean",
+      "time_unit": "us",
+      "real_time": 4275.6067,
+      "cpu_time": 4275.6067,
+      "gas_used": 759785,
+      "gas_rate": 177702266.2070391
+    },
+    {
+      "name": "geth/main/sha1_shifts/2737",
+      "time_unit": "us",
+      "real_time": 8461.466,
+      "cpu_time": 8461.466,
+      "gas_used": 1484254,
+      "gas_rate": 175413338.53968093
+    },
+    {
+      "name": "geth/main/sha1_shifts/2737",
+      "time_unit": "us",
+      "real_time": 8282.158000000001,
+      "cpu_time": 8282.158000000001,
+      "gas_used": 1484254,
+      "gas_rate": 179211022.05487987
+    },
+    {
+      "name": "geth/main/sha1_shifts/2737",
+      "time_unit": "us",
+      "real_time": 8376.291,
+      "cpu_time": 8376.291,
+      "gas_used": 1484254,
+      "gas_rate": 177197043.41694912
+    },
+    {
+      "name": "geth/main/sha1_shifts/2737",
+      "time_unit": "us",
+      "real_time": 8292.865000000002,
+      "cpu_time": 8292.865000000002,
+      "gas_used": 1484254,
+      "gas_rate": 178979640.93229538
+    },
+    {
+      "name": "geth/main/sha1_shifts/2737",
+      "time_unit": "us",
+      "real_time": 8533.715,
+      "cpu_time": 8533.715,
+      "gas_used": 1484254,
+      "gas_rate": 173928236.41286355
+    },
+    {
+      "name": "geth/main/sha1_shifts/2737",
+      "time_unit": "us",
+      "real_time": 8358.247000000001,
+      "cpu_time": 8358.247000000001,
+      "gas_used": 1484254,
+      "gas_rate": 177579580.9815144
+    },
+    {
+      "name": "geth/main/sha1_shifts/2737",
+      "time_unit": "us",
+      "real_time": 8163.009000000001,
+      "cpu_time": 8163.009000000001,
+      "gas_used": 1484254,
+      "gas_rate": 181826823.9077036
+    },
+    {
+      "name": "geth/main/sha1_shifts/2737",
+      "time_unit": "us",
+      "real_time": 8319.382,
+      "cpu_time": 8319.382,
+      "gas_used": 1484254,
+      "gas_rate": 178409165.48849422
+    },
+    {
+      "name": "geth/main/sha1_shifts/2737",
+      "time_unit": "us",
+      "real_time": 8100.088,
+      "cpu_time": 8100.088,
+      "gas_used": 1484254,
+      "gas_rate": 183239243.82056096
+    },
+    {
+      "name": "geth/main/sha1_shifts/2737",
+      "time_unit": "us",
+      "real_time": 8551.211000000001,
+      "cpu_time": 8551.211000000001,
+      "gas_used": 1484254,
+      "gas_rate": 173572374.7197911
+    },
+    {
+      "name": "geth/main/sha1_shifts/2737_mean",
+      "run_type": "aggregate",
+      "aggregate_name": "mean",
+      "time_unit": "us",
+      "real_time": 8343.8432,
+      "cpu_time": 8343.8432,
+      "gas_used": 1484254,
+      "gas_rate": 177886132.8554209
+    },
+    {
+      "name": "geth/main/sha1_shifts/5311",
+      "time_unit": "us",
+      "real_time": 15990.607,
+      "cpu_time": 15990.607,
+      "gas_used": 2898473,
+      "gas_rate": 181260974.02056095
+    },
+    {
+      "name": "geth/main/sha1_shifts/5311",
+      "time_unit": "us",
+      "real_time": 15746.694,
+      "cpu_time": 15746.694,
+      "gas_used": 2898473,
+      "gas_rate": 184068668.63609594
+    },
+    {
+      "name": "geth/main/sha1_shifts/5311",
+      "time_unit": "us",
+      "real_time": 16136.239,
+      "cpu_time": 16136.239,
+      "gas_used": 2898473,
+      "gas_rate": 179625066.28713173
+    },
+    {
+      "name": "geth/main/sha1_shifts/5311",
+      "time_unit": "us",
+      "real_time": 16323.246000000001,
+      "cpu_time": 16323.246000000001,
+      "gas_used": 2898473,
+      "gas_rate": 177567194.6621401
+    },
+    {
+      "name": "geth/main/sha1_shifts/5311",
+      "time_unit": "us",
+      "real_time": 16481.307999999997,
+      "cpu_time": 16481.307999999997,
+      "gas_used": 2898473,
+      "gas_rate": 175864257.86108726
+    },
+    {
+      "name": "geth/main/sha1_shifts/5311",
+      "time_unit": "us",
+      "real_time": 16125.614,
+      "cpu_time": 16125.614,
+      "gas_used": 2898473,
+      "gas_rate": 179743419.38235655
+    },
+    {
+      "name": "geth/main/sha1_shifts/5311",
+      "time_unit": "us",
+      "real_time": 16030.428,
+      "cpu_time": 16030.428,
+      "gas_used": 2898473,
+      "gas_rate": 180810705.74035826
+    },
+    {
+      "name": "geth/main/sha1_shifts/5311",
+      "time_unit": "us",
+      "real_time": 16866.457000000002,
+      "cpu_time": 16866.457000000002,
+      "gas_used": 2898473,
+      "gas_rate": 171848361.51421723
+    },
+    {
+      "name": "geth/main/sha1_shifts/5311",
+      "time_unit": "us",
+      "real_time": 15933.945,
+      "cpu_time": 15933.945,
+      "gas_used": 2898473,
+      "gas_rate": 181905548.1865916
+    },
+    {
+      "name": "geth/main/sha1_shifts/5311",
+      "time_unit": "us",
+      "real_time": 16265.598,
+      "cpu_time": 16265.598,
+      "gas_used": 2898473,
+      "gas_rate": 178196522.5010479
+    },
+    {
+      "name": "geth/main/sha1_shifts/5311_mean",
+      "run_type": "aggregate",
+      "aggregate_name": "mean",
+      "time_unit": "us",
+      "real_time": 16190.0136,
+      "cpu_time": 16190.0136,
+      "gas_used": 2898473,
+      "gas_rate": 179028447.51161912
+    },
+    {
+      "name": "geth/main/blake2b_shifts/2805nulls",
+      "time_unit": "us",
+      "real_time": 17534.981,
+      "cpu_time": 17534.981,
+      "gas_used": 3423526,
+      "gas_rate": 195239789.53840896
+    },
+    {
+      "name": "geth/main/blake2b_shifts/2805nulls",
+      "time_unit": "us",
+      "real_time": 17433.242,
+      "cpu_time": 17433.242,
+      "gas_used": 3423526,
+      "gas_rate": 196379193.26766646
+    },
+    {
+      "name": "geth/main/blake2b_shifts/2805nulls",
+      "time_unit": "us",
+      "real_time": 17031.671,
+      "cpu_time": 17031.671,
+      "gas_used": 3423526,
+      "gas_rate": 201009401.83731827
+    },
+    {
+      "name": "geth/main/blake2b_shifts/2805nulls",
+      "time_unit": "us",
+      "real_time": 19378.45,
+      "cpu_time": 19378.45,
+      "gas_used": 3423526,
+      "gas_rate": 176666658.06604758
+    },
+    {
+      "name": "geth/main/blake2b_shifts/2805nulls",
+      "time_unit": "us",
+      "real_time": 20811.071,
+      "cpu_time": 20811.071,
+      "gas_used": 3423526,
+      "gas_rate": 164505036.7662481
+    },
+    {
+      "name": "geth/main/blake2b_shifts/2805nulls",
+      "time_unit": "us",
+      "real_time": 18951.555,
+      "cpu_time": 18951.555,
+      "gas_used": 3423526,
+      "gas_rate": 180646179.16577294
+    },
+    {
+      "name": "geth/main/blake2b_shifts/2805nulls",
+      "time_unit": "us",
+      "real_time": 18362.074,
+      "cpu_time": 18362.074,
+      "gas_used": 3423526,
+      "gas_rate": 186445496.2985118
+    },
+    {
+      "name": "geth/main/blake2b_shifts/2805nulls",
+      "time_unit": "us",
+      "real_time": 17899.897,
+      "cpu_time": 17899.897,
+      "gas_used": 3423526,
+      "gas_rate": 191259536.29789042
+    },
+    {
+      "name": "geth/main/blake2b_shifts/2805nulls",
+      "time_unit": "us",
+      "real_time": 19180.364999999998,
+      "cpu_time": 19180.364999999998,
+      "gas_used": 3423526,
+      "gas_rate": 178491180.95510697
+    },
+    {
+      "name": "geth/main/blake2b_shifts/2805nulls",
+      "time_unit": "us",
+      "real_time": 18514.153000000002,
+      "cpu_time": 18514.153000000002,
+      "gas_used": 3423526,
+      "gas_rate": 184913995.2554135
+    },
+    {
+      "name": "geth/main/blake2b_shifts/2805nulls_mean",
+      "run_type": "aggregate",
+      "aggregate_name": "mean",
+      "time_unit": "us",
+      "real_time": 18509.745899999998,
+      "cpu_time": 18509.745899999998,
+      "gas_used": 3423526,
+      "gas_rate": 184958022.57339472
+    },
+    {
+      "name": "geth/main/blake2b_shifts/5610nulls",
+      "time_unit": "us",
+      "real_time": 36870.653,
+      "cpu_time": 36870.653,
+      "gas_used": 7434820,
+      "gas_rate": 201646008.27655536
+    },
+    {
+      "name": "geth/main/blake2b_shifts/5610nulls",
+      "time_unit": "us",
+      "real_time": 37296.898,
+      "cpu_time": 37296.898,
+      "gas_used": 7434820,
+      "gas_rate": 199341510.921364
+    },
+    {
+      "name": "geth/main/blake2b_shifts/5610nulls",
+      "time_unit": "us",
+      "real_time": 35851.479,
+      "cpu_time": 35851.479,
+      "gas_used": 7434820,
+      "gas_rate": 207378334.37778118
+    },
+    {
+      "name": "geth/main/blake2b_shifts/5610nulls",
+      "time_unit": "us",
+      "real_time": 36956.423,
+      "cpu_time": 36956.423,
+      "gas_used": 7434820,
+      "gas_rate": 201178019.8532742
+    },
+    {
+      "name": "geth/main/blake2b_shifts/5610nulls",
+      "time_unit": "us",
+      "real_time": 36646.564,
+      "cpu_time": 36646.564,
+      "gas_used": 7434820,
+      "gas_rate": 202879047.54181048
+    },
+    {
+      "name": "geth/main/blake2b_shifts/5610nulls",
+      "time_unit": "us",
+      "real_time": 36185.954000000005,
+      "cpu_time": 36185.954000000005,
+      "gas_used": 7434820,
+      "gas_rate": 205461489.28393593
+    },
+    {
+      "name": "geth/main/blake2b_shifts/5610nulls",
+      "time_unit": "us",
+      "real_time": 36369.391,
+      "cpu_time": 36369.391,
+      "gas_used": 7434820,
+      "gas_rate": 204425199.2011634
+    },
+    {
+      "name": "geth/main/blake2b_shifts/5610nulls",
+      "time_unit": "us",
+      "real_time": 36475.077,
+      "cpu_time": 36475.077,
+      "gas_used": 7434820,
+      "gas_rate": 203832880.18829954
+    },
+    {
+      "name": "geth/main/blake2b_shifts/5610nulls",
+      "time_unit": "us",
+      "real_time": 35927.560999999994,
+      "cpu_time": 35927.560999999994,
+      "gas_used": 7434820,
+      "gas_rate": 206939179.64539817
+    },
+    {
+      "name": "geth/main/blake2b_shifts/5610nulls",
+      "time_unit": "us",
+      "real_time": 36553.632999999994,
+      "cpu_time": 36553.632999999994,
+      "gas_used": 7434820,
+      "gas_rate": 203394830.82297185
+    },
+    {
+      "name": "geth/main/blake2b_shifts/5610nulls_mean",
+      "run_type": "aggregate",
+      "aggregate_name": "mean",
+      "time_unit": "us",
+      "real_time": 36513.3633,
+      "cpu_time": 36513.3633,
+      "gas_used": 7434820,
+      "gas_rate": 203619150.0332154
+    },
+    {
+      "name": "geth/main/blake2b_shifts/8415nulls",
+      "time_unit": "us",
+      "real_time": 55048.37899999999,
+      "cpu_time": 55048.37899999999,
+      "gas_used": 12043105,
+      "gas_rate": 218773108.65048364
+    },
+    {
+      "name": "geth/main/blake2b_shifts/8415nulls",
+      "time_unit": "us",
+      "real_time": 54577.102,
+      "cpu_time": 54577.102,
+      "gas_used": 12043105,
+      "gas_rate": 220662229.37231076
+    },
+    {
+      "name": "geth/main/blake2b_shifts/8415nulls",
+      "time_unit": "us",
+      "real_time": 54858.443,
+      "cpu_time": 54858.443,
+      "gas_used": 12043105,
+      "gas_rate": 219530565.24043164
+    },
+    {
+      "name": "geth/main/blake2b_shifts/8415nulls",
+      "time_unit": "us",
+      "real_time": 57196.061,
+      "cpu_time": 57196.061,
+      "gas_used": 12043105,
+      "gas_rate": 210558293.51605174
+    },
+    {
+      "name": "geth/main/blake2b_shifts/8415nulls",
+      "time_unit": "us",
+      "real_time": 56442.049,
+      "cpu_time": 56442.049,
+      "gas_used": 12043105,
+      "gas_rate": 213371151.70996007
+    },
+    {
+      "name": "geth/main/blake2b_shifts/8415nulls",
+      "time_unit": "us",
+      "real_time": 56186.284,
+      "cpu_time": 56186.284,
+      "gas_used": 12043105,
+      "gas_rate": 214342436.31417233
+    },
+    {
+      "name": "geth/main/blake2b_shifts/8415nulls",
+      "time_unit": "us",
+      "real_time": 55073.791999999994,
+      "cpu_time": 55073.791999999994,
+      "gas_used": 12043105,
+      "gas_rate": 218672158.98262465
+    },
+    {
+      "name": "geth/main/blake2b_shifts/8415nulls",
+      "time_unit": "us",
+      "real_time": 54873.574,
+      "cpu_time": 54873.574,
+      "gas_used": 12043105,
+      "gas_rate": 219470031.23944506
+    },
+    {
+      "name": "geth/main/blake2b_shifts/8415nulls",
+      "time_unit": "us",
+      "real_time": 56854.641,
+      "cpu_time": 56854.641,
+      "gas_used": 12043105,
+      "gas_rate": 211822725.25474218
+    },
+    {
+      "name": "geth/main/blake2b_shifts/8415nulls",
+      "time_unit": "us",
+      "real_time": 55433.003,
+      "cpu_time": 55433.003,
+      "gas_used": 12043105,
+      "gas_rate": 217255143.11393163
+    },
+    {
+      "name": "geth/main/blake2b_shifts/8415nulls_mean",
+      "run_type": "aggregate",
+      "aggregate_name": "mean",
+      "time_unit": "us",
+      "real_time": 55654.3328,
+      "cpu_time": 55654.3328,
+      "gas_used": 12043105,
+      "gas_rate": 216391148.61511737
+    },
+    {
+      "name": "geth/main/weierstrudel/0",
+      "time_unit": "us",
+      "real_time": 527.078,
+      "cpu_time": 527.078,
+      "gas_used": 47561,
+      "gas_rate": 90235221.3524374
+    },
+    {
+      "name": "geth/main/weierstrudel/0",
+      "time_unit": "us",
+      "real_time": 519.999,
+      "cpu_time": 519.999,
+      "gas_used": 47561,
+      "gas_rate": 91463637.43007198
+    },
+    {
+      "name": "geth/main/weierstrudel/0",
+      "time_unit": "us",
+      "real_time": 538.229,
+      "cpu_time": 538.229,
+      "gas_used": 47561,
+      "gas_rate": 88365732.80146554
+    },
+    {
+      "name": "geth/main/weierstrudel/0",
+      "time_unit": "us",
+      "real_time": 521.059,
+      "cpu_time": 521.059,
+      "gas_used": 47561,
+      "gas_rate": 91277571.2539271
+    },
+    {
+      "name": "geth/main/weierstrudel/0",
+      "time_unit": "us",
+      "real_time": 509.466,
+      "cpu_time": 509.466,
+      "gas_used": 47561,
+      "gas_rate": 93354610.51375361
+    },
+    {
+      "name": "geth/main/weierstrudel/0",
+      "time_unit": "us",
+      "real_time": 521.837,
+      "cpu_time": 521.837,
+      "gas_used": 47561,
+      "gas_rate": 91141486.70945142
+    },
+    {
+      "name": "geth/main/weierstrudel/0",
+      "time_unit": "us",
+      "real_time": 529.253,
+      "cpu_time": 529.253,
+      "gas_used": 47561,
+      "gas_rate": 89864393.7776451
+    },
+    {
+      "name": "geth/main/weierstrudel/0",
+      "time_unit": "us",
+      "real_time": 517.3,
+      "cpu_time": 517.3,
+      "gas_used": 47561,
+      "gas_rate": 91940846.70404021
+    },
+    {
+      "name": "geth/main/weierstrudel/0",
+      "time_unit": "us",
+      "real_time": 519.896,
+      "cpu_time": 519.896,
+      "gas_used": 47561,
+      "gas_rate": 91481757.89003955
+    },
+    {
+      "name": "geth/main/weierstrudel/0",
+      "time_unit": "us",
+      "real_time": 531.154,
+      "cpu_time": 531.154,
+      "gas_used": 47561,
+      "gas_rate": 89542769.14039996
+    },
+    {
+      "name": "geth/main/weierstrudel/0_mean",
+      "run_type": "aggregate",
+      "aggregate_name": "mean",
+      "time_unit": "us",
+      "real_time": 523.5270999999999,
+      "cpu_time": 523.5270999999999,
+      "gas_used": 47561,
+      "gas_rate": 90847255.08956462
+    },
+    {
+      "name": "geth/main/weierstrudel/1",
+      "time_unit": "us",
+      "real_time": 1181.956,
+      "cpu_time": 1181.956,
+      "gas_used": 130559,
+      "gas_rate": 110460118.65077889
+    },
+    {
+      "name": "geth/main/weierstrudel/1",
+      "time_unit": "us",
+      "real_time": 1142.665,
+      "cpu_time": 1142.665,
+      "gas_used": 130559,
+      "gas_rate": 114258334.6825185
+    },
+    {
+      "name": "geth/main/weierstrudel/1",
+      "time_unit": "us",
+      "real_time": 1180.94,
+      "cpu_time": 1180.94,
+      "gas_used": 130559,
+      "gas_rate": 110555150.98142157
+    },
+    {
+      "name": "geth/main/weierstrudel/1",
+      "time_unit": "us",
+      "real_time": 1151.954,
+      "cpu_time": 1151.954,
+      "gas_used": 130559,
+      "gas_rate": 113336990.88678889
+    },
+    {
+      "name": "geth/main/weierstrudel/1",
+      "time_unit": "us",
+      "real_time": 1159.5,
+      "cpu_time": 1159.5,
+      "gas_used": 130559,
+      "gas_rate": 112599396.29150496
+    },
+    {
+      "name": "geth/main/weierstrudel/1",
+      "time_unit": "us",
+      "real_time": 1228.336,
+      "cpu_time": 1228.336,
+      "gas_used": 130559,
+      "gas_rate": 106289321.48858292
+    },
+    {
+      "name": "geth/main/weierstrudel/1",
+      "time_unit": "us",
+      "real_time": 1172.3980000000001,
+      "cpu_time": 1172.3980000000001,
+      "gas_used": 130559,
+      "gas_rate": 111360647.15224692
+    },
+    {
+      "name": "geth/main/weierstrudel/1",
+      "time_unit": "us",
+      "real_time": 1139.5949999999998,
+      "cpu_time": 1139.5949999999998,
+      "gas_used": 130559,
+      "gas_rate": 114566139.7250778
+    },
+    {
+      "name": "geth/main/weierstrudel/1",
+      "time_unit": "us",
+      "real_time": 1149.904,
+      "cpu_time": 1149.904,
+      "gas_used": 130559,
+      "gas_rate": 113539043.25926338
+    },
+    {
+      "name": "geth/main/weierstrudel/1",
+      "time_unit": "us",
+      "real_time": 1193.358,
+      "cpu_time": 1193.358,
+      "gas_used": 130559,
+      "gas_rate": 109404721.80183986
+    },
+    {
+      "name": "geth/main/weierstrudel/1_mean",
+      "run_type": "aggregate",
+      "aggregate_name": "mean",
+      "time_unit": "us",
+      "real_time": 1170.0606,
+      "cpu_time": 1170.0606,
+      "gas_used": 130559,
+      "gas_rate": 111583109.45604014
+    },
+    {
+      "name": "geth/main/weierstrudel/3",
+      "time_unit": "us",
+      "real_time": 1790.474,
+      "cpu_time": 1790.474,
+      "gas_used": 202241,
+      "gas_rate": 112953888.18826747
+    },
+    {
+      "name": "geth/main/weierstrudel/3",
+      "time_unit": "us",
+      "real_time": 1869.3029999999999,
+      "cpu_time": 1869.3029999999999,
+      "gas_used": 202241,
+      "gas_rate": 108190592.9643295
+    },
+    {
+      "name": "geth/main/weierstrudel/3",
+      "time_unit": "us",
+      "real_time": 1822.57,
+      "cpu_time": 1822.57,
+      "gas_used": 202241,
+      "gas_rate": 110964736.60819612
+    },
+    {
+      "name": "geth/main/weierstrudel/3",
+      "time_unit": "us",
+      "real_time": 1815.355,
+      "cpu_time": 1815.355,
+      "gas_used": 202241,
+      "gas_rate": 111405758.10240972
+    },
+    {
+      "name": "geth/main/weierstrudel/3",
+      "time_unit": "us",
+      "real_time": 1804.842,
+      "cpu_time": 1804.842,
+      "gas_used": 202241,
+      "gas_rate": 112054684.01112118
+    },
+    {
+      "name": "geth/main/weierstrudel/3",
+      "time_unit": "us",
+      "real_time": 1809.164,
+      "cpu_time": 1809.164,
+      "gas_used": 202241,
+      "gas_rate": 111786991.11854978
+    },
+    {
+      "name": "geth/main/weierstrudel/3",
+      "time_unit": "us",
+      "real_time": 1788.5200000000002,
+      "cpu_time": 1788.5200000000002,
+      "gas_used": 202241,
+      "gas_rate": 113077292.95730546
+    },
+    {
+      "name": "geth/main/weierstrudel/3",
+      "time_unit": "us",
+      "real_time": 1809.6319999999998,
+      "cpu_time": 1809.6319999999998,
+      "gas_used": 202241,
+      "gas_rate": 111758081.20103978
+    },
+    {
+      "name": "geth/main/weierstrudel/3",
+      "time_unit": "us",
+      "real_time": 1864.8990000000001,
+      "cpu_time": 1864.8990000000001,
+      "gas_used": 202241,
+      "gas_rate": 108446087.42886344
+    },
+    {
+      "name": "geth/main/weierstrudel/3",
+      "time_unit": "us",
+      "real_time": 1852.2060000000001,
+      "cpu_time": 1852.2060000000001,
+      "gas_used": 202241,
+      "gas_rate": 109189258.6461765
+    },
+    {
+      "name": "geth/main/weierstrudel/3_mean",
+      "run_type": "aggregate",
+      "aggregate_name": "mean",
+      "time_unit": "us",
+      "real_time": 1822.6965,
+      "cpu_time": 1822.6965,
+      "gas_used": 202241,
+      "gas_rate": 110957035.35942489
+    },
+    {
+      "name": "geth/main/weierstrudel/9",
+      "time_unit": "us",
+      "real_time": 3706.2909999999997,
+      "cpu_time": 3706.2909999999997,
+      "gas_used": 417881,
+      "gas_rate": 112749106.85642332
+    },
+    {
+      "name": "geth/main/weierstrudel/9",
+      "time_unit": "us",
+      "real_time": 3956.813,
+      "cpu_time": 3956.813,
+      "gas_used": 417881,
+      "gas_rate": 105610500.16768545
+    },
+    {
+      "name": "geth/main/weierstrudel/9",
+      "time_unit": "us",
+      "real_time": 3802.027,
+      "cpu_time": 3802.027,
+      "gas_used": 417881,
+      "gas_rate": 109910055.87282783
+    },
+    {
+      "name": "geth/main/weierstrudel/9",
+      "time_unit": "us",
+      "real_time": 3803.0789999999997,
+      "cpu_time": 3803.0789999999997,
+      "gas_used": 417881,
+      "gas_rate": 109879652.7760796
+    },
+    {
+      "name": "geth/main/weierstrudel/9",
+      "time_unit": "us",
+      "real_time": 3965.291,
+      "cpu_time": 3965.291,
+      "gas_used": 417881,
+      "gas_rate": 105384699.3827187
+    },
+    {
+      "name": "geth/main/weierstrudel/9",
+      "time_unit": "us",
+      "real_time": 3825.0060000000003,
+      "cpu_time": 3825.0060000000003,
+      "gas_used": 417881,
+      "gas_rate": 109249763.26834519
+    },
+    {
+      "name": "geth/main/weierstrudel/9",
+      "time_unit": "us",
+      "real_time": 3885.101,
+      "cpu_time": 3885.101,
+      "gas_used": 417881,
+      "gas_rate": 107559880.68263862
+    },
+    {
+      "name": "geth/main/weierstrudel/9",
+      "time_unit": "us",
+      "real_time": 3786.0049999999997,
+      "cpu_time": 3786.0049999999997,
+      "gas_used": 417881,
+      "gas_rate": 110375184.39621714
+    },
+    {
+      "name": "geth/main/weierstrudel/9",
+      "time_unit": "us",
+      "real_time": 3719.0370000000003,
+      "cpu_time": 3719.0370000000003,
+      "gas_used": 417881,
+      "gas_rate": 112362689.58872955
+    },
+    {
+      "name": "geth/main/weierstrudel/9",
+      "time_unit": "us",
+      "real_time": 3774.0860000000002,
+      "cpu_time": 3774.0860000000002,
+      "gas_used": 417881,
+      "gas_rate": 110723761.99164513
+    },
+    {
+      "name": "geth/main/weierstrudel/9_mean",
+      "run_type": "aggregate",
+      "aggregate_name": "mean",
+      "time_unit": "us",
+      "real_time": 3822.2736000000004,
+      "cpu_time": 3822.2736000000004,
+      "gas_used": 417881,
+      "gas_rate": 109327861.82548521
+    },
+    {
+      "name": "geth/main/weierstrudel/14",
+      "time_unit": "us",
+      "real_time": 5532.821,
+      "cpu_time": 5532.821,
+      "gas_used": 598273,
+      "gas_rate": 108131638.45351224
+    },
+    {
+      "name": "geth/main/weierstrudel/14",
+      "time_unit": "us",
+      "real_time": 5558.71,
+      "cpu_time": 5558.71,
+      "gas_used": 598273,
+      "gas_rate": 107628028.80524439
+    },
+    {
+      "name": "geth/main/weierstrudel/14",
+      "time_unit": "us",
+      "real_time": 5396.241,
+      "cpu_time": 5396.241,
+      "gas_used": 598273,
+      "gas_rate": 110868473.07227384
+    },
+    {
+      "name": "geth/main/weierstrudel/14",
+      "time_unit": "us",
+      "real_time": 5608.5869999999995,
+      "cpu_time": 5608.5869999999995,
+      "gas_used": 598273,
+      "gas_rate": 106670895.89588252
+    },
+    {
+      "name": "geth/main/weierstrudel/14",
+      "time_unit": "us",
+      "real_time": 5397.514,
+      "cpu_time": 5397.514,
+      "gas_used": 598273,
+      "gas_rate": 110842324.81842567
+    },
+    {
+      "name": "geth/main/weierstrudel/14",
+      "time_unit": "us",
+      "real_time": 5306.305,
+      "cpu_time": 5306.305,
+      "gas_used": 598273,
+      "gas_rate": 112747571.04991138
+    },
+    {
+      "name": "geth/main/weierstrudel/14",
+      "time_unit": "us",
+      "real_time": 5457.028,
+      "cpu_time": 5457.028,
+      "gas_used": 598273,
+      "gas_rate": 109633485.47964203
+    },
+    {
+      "name": "geth/main/weierstrudel/14",
+      "time_unit": "us",
+      "real_time": 5598.652,
+      "cpu_time": 5598.652,
+      "gas_used": 598273,
+      "gas_rate": 106860187.05931357
+    },
+    {
+      "name": "geth/main/weierstrudel/14",
+      "time_unit": "us",
+      "real_time": 5590.177,
+      "cpu_time": 5590.177,
+      "gas_used": 598273,
+      "gas_rate": 107022192.67833559
+    },
+    {
+      "name": "geth/main/weierstrudel/14",
+      "time_unit": "us",
+      "real_time": 5580.212,
+      "cpu_time": 5580.212,
+      "gas_used": 598273,
+      "gas_rate": 107213310.17531233
+    },
+    {
+      "name": "geth/main/weierstrudel/14_mean",
+      "run_type": "aggregate",
+      "aggregate_name": "mean",
+      "time_unit": "us",
+      "real_time": 5502.6247,
+      "cpu_time": 5502.6247,
+      "gas_used": 598273,
+      "gas_rate": 108725023.53286059
+    }
+  ]
+}
