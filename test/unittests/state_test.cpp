@@ -39,6 +39,11 @@ inline auto keccak256(const evmc::address& addr) noexcept
     return ethash::keccak256(addr.bytes, std::size(addr.bytes));
 }
 
+inline auto keccak256(const evmc::bytes32& h) noexcept
+{
+    return ethash::keccak256_32(h.bytes);
+}
+
 using evmc::address;
 using evmc::from_hex;
 using evmc::hex;
@@ -112,9 +117,9 @@ inline bytes list(const Items&... items)
     size_t items_len = 0;
     for (const auto& s : string_items)
         items_len += std::size(s);
-    assert(items_len > 55);
     assert(items_len <= 0xff);
-    auto r = bytes{0xf7 + 1, static_cast<uint8_t>(items_len)};
+    auto r = (items_len <= 55) ? bytes{static_cast<uint8_t>(0xc0 + items_len)} :
+                                 bytes{0xf7 + 1, static_cast<uint8_t>(items_len)};
     for (const auto& s : string_items)
         r += s;
     return r;
@@ -141,6 +146,13 @@ bytes build_leaf_node(const address& addr, const Account& account)
     const auto encoded_path = bytes{0x20} + bytes{path.bytes, sizeof(path)};
     const auto value = rlp::encode(account);  // Double RLP encoding.
     return rlp::list(encoded_path, value);
+}
+
+bytes build_leaf_node(const hash256& key, const hash256& value)
+{
+    const auto path = keccak256(key);
+    const auto encoded_path = bytes{0x20} + bytes{path.bytes, sizeof(path)};
+    return rlp::list(encoded_path, rlp::string(value));
 }
 
 ethash::hash256 hash_leaf_node(const address& addr, const Account& account)
@@ -174,8 +186,8 @@ TEST(state, rlp_v1)
         "a0 56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421"
         "a0 c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470");
 
-    evmc::MockedAccount a;
-    a.balance.bytes[31] = 1;
+    Account a;
+    a.set_balance(1);
     EXPECT_EQ(hex(rlp::encode(a)), hex(expected));
     EXPECT_EQ(rlp::encode(a).size(), 70);
 }
@@ -198,7 +210,7 @@ TEST(state, build_leaf_node)
 {
     State state;
     const auto addr = 0x0000000000000000000000000000000000000002_address;
-    state[addr].balance.bytes[31] = 1;
+    state[addr].set_balance(1);
     const auto node = build_leaf_node(addr, state[addr]);
     EXPECT_EQ(hex(node),
         "f86aa120d52688a8f926c816ca1e079067caba944f158e764817b83fc43594370ca9cf62b846f8448001a056e8"
@@ -216,4 +228,15 @@ TEST(state, single_account_v1)
 
     const auto h = hash_leaf_node(addr, state[addr]);
     EXPECT_EQ(hex(h), "084f337237951e425716a04fb0aaa74111eda9d9c61767f2497697d0a201c92e");
+}
+
+TEST(state, storage_trie_v1)
+{
+    const auto key = 0_bytes32;
+    const auto value = 0x00000000000000000000000000000000000000000000000000000000000001ff_bytes32;
+    const auto node = build_leaf_node(key, value);
+    EXPECT_EQ(hex(node),
+        "e6a120290decd9548b62a8d60345a988386fc84ba6bc95484008f6362f93160ef3e563838201ff");
+    const auto root = keccak256(node);
+    EXPECT_EQ(hex(root), "d9aa83255221f68fdd4931f73f8fe6ea30c191a9619b5fc60ce2914eee1e7e54");
 }
