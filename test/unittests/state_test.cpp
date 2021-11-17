@@ -56,7 +56,7 @@ inline auto hex(const ethash::hash256& h) noexcept
 
 
 // Temporary needed up here to hock RLP encoding of an Account.
-constexpr auto emptyStorageTrieHash =
+constexpr auto emptyTrieHash =
     0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421_bytes32;
 
 constexpr auto emptyCodeHash =
@@ -129,7 +129,7 @@ bytes encode(const Account& a)
 {
     assert(a.storage.empty());
     assert(a.code.empty());
-    return rlp::list(a.nonce, a.balance, emptyStorageTrieHash, emptyCodeHash);
+    return rlp::list(a.nonce, a.balance, emptyTrieHash, emptyCodeHash);
 }
 }  // namespace rlp
 
@@ -139,6 +139,22 @@ bytes encode(const Account& a)
 
 namespace
 {
+class Trie
+{
+    std::map<bytes, bytes> m_map;
+
+public:
+    void insert(bytes k, bytes v) { m_map[std::move(k)] = std::move(v); }
+
+    hash256 get_root_hash()
+    {
+        if (m_map.empty())
+            return emptyTrieHash;
+
+        return {};
+    }
+};
+
 using State = std::map<address, Account>;
 bytes build_leaf_node(const address& addr, const Account& account)
 {
@@ -196,7 +212,10 @@ TEST(state, empty_trie)
 {
     const auto rlp_null = bytes{0x80};
     const auto empty_trie_hash = keccak256(rlp_null);
-    EXPECT_EQ(empty_trie_hash, emptyStorageTrieHash);
+    EXPECT_EQ(empty_trie_hash, emptyTrieHash);
+
+    Trie trie;
+    EXPECT_EQ(trie.get_root_hash(), emptyTrieHash);
 }
 
 TEST(state, hashed_address)
