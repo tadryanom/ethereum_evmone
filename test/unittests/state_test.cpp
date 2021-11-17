@@ -359,5 +359,45 @@ TEST(state, trie_branch_node)
 
 TEST(state, trie_extension_node)
 {
+    Trie trie;
+    const auto k1 = to_bytes("XXA");
+    const auto k2 = to_bytes("XXZ");
+    const auto v1 = to_bytes("v___________________________1");
+    const auto v2 = to_bytes("v___________________________2");
 
+    const auto common_prefix = k1.substr(0, 2);
+    EXPECT_EQ(common_prefix, k2.substr(0, 2));
+    const auto n1 = uint8_t(k1[2] >> 4);
+    const auto n2 = uint8_t(k2[2] >> 4);
+    EXPECT_EQ(n1, 4);
+    EXPECT_EQ(n2, 5);
+
+    const auto hp1 = bytes{uint8_t(0x30 | (k1[2] & 0x0f))};
+    EXPECT_EQ(hex(hp1), "31");
+    const auto hp2 = bytes{uint8_t(0x30 | (k2[2] & 0x0f))};
+
+    const auto node1 = rlp::list(hp1, v1);
+    EXPECT_EQ(hex(node1), "df319d765f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f31");
+    const auto node2 = rlp::list(hp2, v2);
+
+
+    BranchNode branch;
+    branch.insert(n1, keccak256(node1));
+    branch.insert(n2, keccak256(node2));
+    EXPECT_EQ(hex(branch.rlp()),
+        "f85180808080a05806d69cca87e01a0e7567781f037a6e86cdc72dff63366b000d7e00eedd3647a0ddcda22511"
+        "6d4479645995715b72cc33ab2ac7229345297556354ff6baa5a7e58080808080808080808080");
+    EXPECT_EQ(
+        hex(branch.hash()), "1aaa6f712413b9a115730852323deb5f5d796c29151a60a1f55f41a25354cd26");
+
+    const auto hp_prefix = bytes{0x00} + common_prefix;
+    const auto ext = rlp::list(hp_prefix, branch.hash());
+    EXPECT_EQ(
+        hex(keccak256(ext)), "3eefc183db443d44810b7d925684eb07256e691d5c9cb13215660107121454f9");
+
+
+    // trie.insert(to_bytes("A"), v1);
+    // trie.insert(to_bytes("B"), v2);
+    // EXPECT_EQ(hex(trie.get_root_hash()),
+    //     "54d77fcd6e44eacae56a57fdf41c55c2029f232d0f1fccaded720c5abfcb6354");
 }
