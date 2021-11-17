@@ -401,3 +401,48 @@ TEST(state, trie_extension_node)
     // EXPECT_EQ(hex(trie.get_root_hash()),
     //     "54d77fcd6e44eacae56a57fdf41c55c2029f232d0f1fccaded720c5abfcb6354");
 }
+
+
+TEST(state, trie_extension_node2)
+{
+    Trie trie;
+    const auto k1 = to_bytes("XXA");
+    const auto k2 = to_bytes("XYZ");
+    const auto v1 = to_bytes("v___________________________1");
+    const auto v2 = to_bytes("v___________________________2");
+
+    const auto n1 = uint8_t(k1[1] & 0x0f);
+    const auto n2 = uint8_t(k2[1] & 0x0f);
+    EXPECT_EQ(n1, 8);
+    EXPECT_EQ(n2, 9);
+
+    const auto hp1 = bytes{0x20} + k1.substr(2);
+    EXPECT_EQ(hex(hp1), "2041");
+    const auto hp2 = bytes{0x20} + k2.substr(2);
+
+    const auto node1 = rlp::list(hp1, v1);
+    EXPECT_EQ(hex(node1), "e18220419d765f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f31");
+    const auto node2 = rlp::list(hp2, v2);
+    EXPECT_EQ(hex(node2), "e182205a9d765f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f32");
+
+    BranchNode branch;
+    branch.insert(n1, keccak256(node1));
+    branch.insert(n2, keccak256(node2));
+    EXPECT_EQ(hex(branch.rlp()),
+        "f8518080808080808080a030afaabf307606fe3b9afa75de1e2b3ff5a735ec7c4d78c48dfefbcb88b4553da075"
+        "a7752e1452fb347efd915ff49f693793d396f9b205fb989f7f2a927da7baf780808080808080");
+    EXPECT_EQ(
+        hex(branch.hash()), "01746f8ab5a4cc5d6175cbd9ea9603357634ec06b2059f90710243f098e0ee82");
+
+    const auto hp_prefix =
+        bytes{uint8_t(0x10 | (k1[0] >> 4)), uint8_t((k1[0] << 4) | (k1[1] >> 4))};
+    const auto ext = rlp::list(hp_prefix, branch.hash());
+    EXPECT_EQ(
+        hex(keccak256(ext)), "ac28c08fa3ff1d0d2cc9a6423abb7af3f4dcc37aa2210727e7d3009a9b4a34e8");
+
+
+    // trie.insert(to_bytes("A"), v1);
+    // trie.insert(to_bytes("B"), v2);
+    // EXPECT_EQ(hex(trie.get_root_hash()),
+    //     "54d77fcd6e44eacae56a57fdf41c55c2029f232d0f1fccaded720c5abfcb6354");
+}
