@@ -47,6 +47,15 @@ inline auto hex(const hash256& h) noexcept
     return hex({h.bytes, std::size(h.bytes)});
 }
 
+inline bytes to_bytes(std::string_view s)
+{
+    bytes b;
+    b.reserve(std::size(s));
+    for (const auto c : s)
+        b.push_back(static_cast<uint8_t>(c));
+    return b;
+}
+
 
 // Temporary needed up here to hock RLP encoding of an Account.
 constexpr auto emptyTrieHash =
@@ -132,20 +141,38 @@ bytes encode(const Account& a)
 
 namespace
 {
+struct BranchNode
+{
+    hash256 items[16];
+    void insert(uint8_t nibble, const hash256& value) { items[nibble] = value; }
+
+    [[nodiscard]] bytes rlp() const
+    {
+        return rlp::list(items[0], items[1], items[2], items[3], items[4], items[5], items[6],
+            items[7], items[8], items[9], items[10], items[11], items[12], items[13], items[14],
+            items[15], bytes_view{});
+    }
+
+    [[nodiscard]] hash256 hash() const { return keccak256(rlp()); }
+};
+
 class Trie
 {
     std::map<bytes, bytes> m_map;
 
+public:
     static bytes build_leaf_node(bytes_view path, bytes_view value)
     {
         const auto encoded_path = bytes{0x20} + bytes{path};
         return rlp::list(encoded_path, value);
     }
 
-public:
     void insert(bytes k, bytes v) { m_map[std::move(k)] = std::move(v); }
 
-    hash256 get_root_hash() const
+    /// Helper
+    void insert(hash256 k, bytes v) { insert(bytes{k.bytes, sizeof(k)}, std::move(v)); }
+
+    [[nodiscard]] hash256 get_root_hash() const
     {
         const auto size = std::size(m_map);
         if (size == 0)
@@ -211,6 +238,8 @@ TEST(state, rlp_v1)
     a.set_balance(1);
     EXPECT_EQ(hex(rlp::encode(a)), hex(expected));
     EXPECT_EQ(rlp::encode(a).size(), 70);
+
+    EXPECT_EQ(hex(rlp::string(0x31)), "31");
 }
 
 TEST(state, empty_trie)
@@ -246,12 +275,17 @@ TEST(state, single_account_v1)
 {
     // Expected value computed in go-ethereum.
 
-    State state;
+    Account a;
     const auto addr = 0x0000000000000000000000000000000000000002_address;
-    state[addr].balance.bytes[31] = 1;
+    a.set_balance(1);
 
-    const auto h = hash_leaf_node(addr, state[addr]);
+    const auto h = hash_leaf_node(addr, a);
     EXPECT_EQ(hex(h), "084f337237951e425716a04fb0aaa74111eda9d9c61767f2497697d0a201c92e");
+
+    Trie trie;
+    trie.insert(keccak256(addr), rlp::encode(a));
+    EXPECT_EQ(hex(trie.get_root_hash()),
+        "084f337237951e425716a04fb0aaa74111eda9d9c61767f2497697d0a201c92e");
 }
 
 TEST(state, storage_trie_v1)
@@ -263,4 +297,67 @@ TEST(state, storage_trie_v1)
         "e6a120290decd9548b62a8d60345a988386fc84ba6bc95484008f6362f93160ef3e563838201ff");
     const auto root = keccak256(node);
     EXPECT_EQ(hex(root), "d9aa83255221f68fdd4931f73f8fe6ea30c191a9619b5fc60ce2914eee1e7e54");
+
+    Trie trie;
+    trie.insert(keccak256(key), rlp::string(value));
+    EXPECT_EQ(hex(trie.get_root_hash()),
+        "d9aa83255221f68fdd4931f73f8fe6ea30c191a9619b5fc60ce2914eee1e7e54");
+}
+
+TEST(state, trie_ex1)
+{
+    Trie trie;
+    const auto k = to_bytes("\x01\x02\x03");
+    const auto v = to_bytes("hello");
+    EXPECT_EQ(hex(Trie::build_leaf_node(k, v)), "cb84200102038568656c6c6f");
+    trie.insert(k, v);
+    EXPECT_EQ(hex(trie.get_root_hash()),
+        "5fbc6aa40edcd095c560e3f55917899a939bf24a2ab47021d2736c7b885d9ddf");
+    EXPECT_EQ(hex(trie.get_root_hash()),
+        "82c8fd36022fbc91bd6b51580cfd941d3d9994017d59ab2e8293ae9c94c3ab6e");
+}
+
+TEST(state, trie_branch_node)
+{
+    Trie trie;
+    const auto k1 = to_bytes("A");
+    const auto k2 = to_bytes("z");
+    const auto v1 = to_bytes("v___________________________1");
+    const auto v2 = to_bytes("v___________________________2");
+
+    const auto n1 = uint8_t(k1[0] >> 4);
+    const auto n2 = uint8_t(k2[0] >> 4);
+    EXPECT_EQ(n1, 4);
+    EXPECT_EQ(n2, 7);
+
+    auto hp1 = k1;
+    hp1[0] = 0x30 | (hp1[0] & 0x0f);
+    EXPECT_EQ(hex(hp1), "31");
+    auto hp2 = k2;
+    hp2[0] = 0x30 | (hp2[0] & 0x0f);
+
+    const auto node1 = rlp::list(hp1, v1);
+    EXPECT_EQ(hex(node1), "df319d765f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f31");
+    const auto node2 = rlp::list(hp2, v2);
+
+
+    BranchNode branch;
+    branch.insert(n1, keccak256(node1));
+    branch.insert(n2, keccak256(node2));
+    EXPECT_EQ(hex(branch.rlp()),
+        "f85180808080a05806d69cca87e01a0e7567781f037a6e86cdc72dff63366b000d7e00eedd36478080a0ddcda2"
+        "25116d4479645995715b72cc33ab2ac7229345297556354ff6baa5a7e5808080808080808080");
+    EXPECT_EQ(
+        hex(branch.hash()), "56e911635579e0f86dce3c116af12b30448e01cc634aac127e037efbd29e7f9f");
+
+
+    // trie.insert(to_bytes("A"), v1);
+    // trie.insert(to_bytes("B"), v2);
+    // EXPECT_EQ(hex(trie.get_root_hash()),
+    //     "54d77fcd6e44eacae56a57fdf41c55c2029f232d0f1fccaded720c5abfcb6354");
+}
+
+TEST(state, trie_extension_node)
+{
+
 }
