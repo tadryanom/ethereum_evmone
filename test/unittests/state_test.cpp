@@ -19,29 +19,22 @@ using namespace evmc::literals;
 /// Better than ethash::hash256 because has some additional handy constructors.
 using hash256 = evmc::bytes32;
 
-inline bool operator==(const hash256& a, const ethash::hash256& b) noexcept
+inline hash256 keccak256(bytes_view data) noexcept
 {
-    return std::memcmp(a.bytes, b.bytes, sizeof(a)) == 0;
+    const auto eh = ethash::keccak256(std::data(data), std::size(data));
+    hash256 h;
+    std::memcpy(h.bytes, eh.bytes, sizeof(h));
+    return h;
 }
 
-inline bool operator==(const ethash::hash256& a, const hash256& b) noexcept
+inline hash256 keccak256(const evmc::address& addr) noexcept
 {
-    return b == a;
+    return keccak256({addr.bytes, sizeof(addr)});
 }
 
-inline auto keccak256(bytes_view data) noexcept
+inline hash256 keccak256(const evmc::bytes32& h) noexcept
 {
-    return ethash::keccak256(std::data(data), std::size(data));
-}
-
-inline auto keccak256(const evmc::address& addr) noexcept
-{
-    return ethash::keccak256(addr.bytes, std::size(addr.bytes));
-}
-
-inline auto keccak256(const evmc::bytes32& h) noexcept
-{
-    return ethash::keccak256_32(h.bytes);
+    return keccak256({h.bytes, sizeof(h)});
 }
 
 using evmc::address;
@@ -49,7 +42,7 @@ using evmc::from_hex;
 using evmc::hex;
 using Account = evmc::MockedAccount;
 
-inline auto hex(const ethash::hash256& h) noexcept
+inline auto hex(const hash256& h) noexcept
 {
     return hex({h.bytes, std::size(h.bytes)});
 }
@@ -143,13 +136,25 @@ class Trie
 {
     std::map<bytes, bytes> m_map;
 
+    static bytes build_leaf_node(bytes_view path, bytes_view value)
+    {
+        const auto encoded_path = bytes{0x20} + bytes{path};
+        return rlp::list(encoded_path, value);
+    }
+
 public:
     void insert(bytes k, bytes v) { m_map[std::move(k)] = std::move(v); }
 
-    hash256 get_root_hash()
+    hash256 get_root_hash() const
     {
-        if (m_map.empty())
+        const auto size = std::size(m_map);
+        if (size == 0)
             return emptyTrieHash;
+        else if (size == 1)
+        {
+            const auto& [k, v] = *m_map.begin();
+            return keccak256(build_leaf_node(k, v));
+        }
 
         return {};
     }
@@ -171,7 +176,7 @@ bytes build_leaf_node(const hash256& key, const hash256& value)
     return rlp::list(encoded_path, rlp::string(value));
 }
 
-ethash::hash256 hash_leaf_node(const address& addr, const Account& account)
+hash256 hash_leaf_node(const address& addr, const Account& account)
 {
     const auto node = build_leaf_node(addr, account);
     return keccak256(node);
