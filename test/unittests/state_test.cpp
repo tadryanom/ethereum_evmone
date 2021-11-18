@@ -339,7 +339,10 @@ struct StackTrie
             }
             else
             {
-                assert(false);
+                nodeType = NodeType::ext;
+                branch = (children[0] = std::make_unique<StackTrie>()).get();
+                branch->nodeType = NodeType::branch;
+                branch->keyOffset = keyOffset + prefix.num_nibbles;
             }
 
             const auto origIdx = key.nibbles[prefix.num_nibbles];
@@ -377,12 +380,19 @@ struct StackTrie
         case NodeType::branch:
         {
             BranchNode node;
-            for (uint8_t i = 0; i < 16; ++i)
+            for (uint8_t i = 0; i < std::size(children); ++i)
             {
                 if (children[i])
                     node.insert(i, children[i]->hash());
             }
             return node.hash();
+        }
+        case NodeType::ext:
+        {
+            const auto branch = children[0].get();
+            assert(branch != nullptr);
+            assert(branch->nodeType == NodeType::branch);
+            return keccak256(rlp::list(key.encode(true), branch->hash()));
         }
         default:
             assert(false);
@@ -486,17 +496,14 @@ TEST(state, storage_trie_v1)
     EXPECT_EQ(hex(st.hash()), "d9aa83255221f68fdd4931f73f8fe6ea30c191a9619b5fc60ce2914eee1e7e54");
 }
 
-TEST(state, DISABLED_trie_ex1)
+TEST(state, trie_ex1)
 {
-    Trie trie;
+    StackTrie trie;
     const auto k = to_bytes("\x01\x02\x03");
     const auto v = to_bytes("hello");
     EXPECT_EQ(hex(Trie::build_leaf_node(k, v)), "cb84200102038568656c6c6f");
-    trie.insert(k, v);
-    EXPECT_EQ(hex(trie.get_root_hash()),
-        "5fbc6aa40edcd095c560e3f55917899a939bf24a2ab47021d2736c7b885d9ddf");
-    EXPECT_EQ(hex(trie.get_root_hash()),
-        "82c8fd36022fbc91bd6b51580cfd941d3d9994017d59ab2e8293ae9c94c3ab6e");
+    trie.insert(Path{k}, v);
+    EXPECT_EQ(hex(trie.hash()), "82c8fd36022fbc91bd6b51580cfd941d3d9994017d59ab2e8293ae9c94c3ab6e");
 }
 
 TEST(state, trie_branch_node)
@@ -579,11 +586,10 @@ TEST(state, trie_extension_node)
     EXPECT_EQ(
         hex(keccak256(ext)), "3eefc183db443d44810b7d925684eb07256e691d5c9cb13215660107121454f9");
 
-
-    // trie.insert(to_bytes("A"), v1);
-    // trie.insert(to_bytes("B"), v2);
-    // EXPECT_EQ(hex(trie.get_root_hash()),
-    //     "54d77fcd6e44eacae56a57fdf41c55c2029f232d0f1fccaded720c5abfcb6354");
+    StackTrie st;
+    st.insert(p1, v1);
+    st.insert(p2, v2);
+    EXPECT_EQ(hex(st.hash()), "3eefc183db443d44810b7d925684eb07256e691d5c9cb13215660107121454f9");
 }
 
 
@@ -626,9 +632,8 @@ TEST(state, trie_extension_node2)
     EXPECT_EQ(
         hex(keccak256(ext)), "ac28c08fa3ff1d0d2cc9a6423abb7af3f4dcc37aa2210727e7d3009a9b4a34e8");
 
-
-    // trie.insert(to_bytes("A"), v1);
-    // trie.insert(to_bytes("B"), v2);
-    // EXPECT_EQ(hex(trie.get_root_hash()),
-    //     "54d77fcd6e44eacae56a57fdf41c55c2029f232d0f1fccaded720c5abfcb6354");
+    StackTrie st;
+    st.insert(p1, v1);
+    st.insert(p2, v2);
+    EXPECT_EQ(hex(st.hash()), "ac28c08fa3ff1d0d2cc9a6423abb7af3f4dcc37aa2210727e7d3009a9b4a34e8");
 }
