@@ -166,7 +166,6 @@ struct Path
 
     Path tail(size_t index) const
     {
-        assert(index > 0);
         assert(index < num_nibbles);
         Path p{{}};
         p.num_nibbles = num_nibbles - index;
@@ -176,7 +175,6 @@ struct Path
 
     Path head(size_t size) const
     {
-        assert(size > 0);
         assert(size < num_nibbles);
         Path p{{}};
         p.num_nibbles = size;
@@ -222,7 +220,7 @@ inline Path common_prefix(const Path& p, const Path& q)
 
 struct BranchNode
 {
-    hash256 items[16];
+    hash256 items[16]{};
     void insert(uint8_t nibble, const hash256& value) { items[nibble] = value; }
 
     [[nodiscard]] bytes rlp() const
@@ -294,6 +292,105 @@ hash256 hash_leaf_node(const address& addr, const Account& account)
     (void)state;
     return {};
 }
+
+enum class NodeType
+{
+    null,
+    leaf,
+    ext,
+    branch,
+    hash
+};
+
+struct StackTrie
+{
+    NodeType nodeType{NodeType::null};
+    bytes val;
+    Path key{{}};
+    size_t keyOffset = 0;
+    std::unique_ptr<StackTrie> children[16];
+
+    void make_leaf(size_t ko, const Path& k, bytes_view v)
+    {
+        nodeType = NodeType::leaf;
+        keyOffset = ko;
+        key = k.tail(keyOffset);
+        val = v;
+    }
+
+    void insert(const Path& k, bytes_view v)
+    {
+        switch (nodeType)
+        {
+        case NodeType::null:
+            make_leaf(keyOffset, k, v);
+            break;
+
+        case NodeType::leaf:
+        {
+            // TODO: Add assert for k == key.
+            const auto prefix = common_prefix(key, k);
+
+            StackTrie* branch = nullptr;
+            if (prefix.num_nibbles == 0)  // Convert into a branch.
+            {
+                nodeType = NodeType::branch;
+                branch = this;
+            }
+            else
+            {
+                assert(false);
+            }
+
+            const auto origIdx = key.nibbles[prefix.num_nibbles];
+            auto me = std::make_unique<StackTrie>();
+            me->make_leaf(prefix.num_nibbles + 1, key, val);
+            branch->children[origIdx] = std::move(me);
+
+            const auto newIdx = k.nibbles[prefix.num_nibbles + keyOffset];
+            assert(origIdx != newIdx);
+            auto he = std::make_unique<StackTrie>();
+            he->make_leaf(branch->keyOffset + 1, k, v);
+            branch->children[newIdx] = std::move(he);
+
+            key = key.head(prefix.num_nibbles);
+            val = {};
+            break;
+        }
+
+        case NodeType::hash:
+        default:
+            assert(false);
+            break;
+        }
+    }
+
+    [[nodiscard]] hash256 hash() const
+    {
+        switch (nodeType)
+        {
+        case NodeType::leaf:
+        {
+            const auto node = rlp::list(key.encode(false), val);
+            return keccak256(node);
+        }
+        case NodeType::branch:
+        {
+            BranchNode node;
+            for (uint8_t i = 0; i < 16; ++i)
+            {
+                if (children[i])
+                    node.insert(i, children[i]->hash());
+            }
+            return node.hash();
+        }
+        default:
+            assert(false);
+        }
+        return {};
+    }
+};
+
 }  // namespace
 
 
@@ -381,6 +478,12 @@ TEST(state, storage_trie_v1)
     trie.insert(keccak256(key), rlp::string(value));
     EXPECT_EQ(hex(trie.get_root_hash()),
         "d9aa83255221f68fdd4931f73f8fe6ea30c191a9619b5fc60ce2914eee1e7e54");
+
+    StackTrie st;
+    const auto xkey = keccak256(key);
+    const auto xval = rlp::string(value);
+    st.insert(Path{{xkey.bytes, sizeof(xkey)}}, xval);
+    EXPECT_EQ(hex(st.hash()), "d9aa83255221f68fdd4931f73f8fe6ea30c191a9619b5fc60ce2914eee1e7e54");
 }
 
 TEST(state, DISABLED_trie_ex1)
@@ -431,11 +534,10 @@ TEST(state, trie_branch_node)
     EXPECT_EQ(
         hex(branch.hash()), "56e911635579e0f86dce3c116af12b30448e01cc634aac127e037efbd29e7f9f");
 
-
-    // trie.insert(to_bytes("A"), v1);
-    // trie.insert(to_bytes("B"), v2);
-    // EXPECT_EQ(hex(trie.get_root_hash()),
-    //     "54d77fcd6e44eacae56a57fdf41c55c2029f232d0f1fccaded720c5abfcb6354");
+    StackTrie st;
+    st.insert(Path{k1}, v1);
+    st.insert(Path{k2}, v2);
+    EXPECT_EQ(hex(st.hash()), "56e911635579e0f86dce3c116af12b30448e01cc634aac127e037efbd29e7f9f");
 }
 
 TEST(state, trie_extension_node)
