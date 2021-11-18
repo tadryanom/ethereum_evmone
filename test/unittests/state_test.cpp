@@ -141,6 +141,71 @@ bytes encode(const Account& a)
 
 namespace
 {
+/// Trie path (key)
+struct Path
+{
+    size_t num_nibbles;  // TODO: Can be converted to uint8_t.
+    uint8_t nibbles[64];
+
+    explicit Path(bytes_view k) noexcept : num_nibbles(2 * std::size(k))
+    {
+        assert(num_nibbles <= 64);
+        size_t i = 0;
+        for (const auto b : k)
+        {
+            nibbles[i++] = b >> 4;
+            nibbles[i++] = b & 0x0f;
+        }
+    }
+
+    [[nodiscard]] uint8_t nibble(size_t index) const
+    {
+        assert(index < num_nibbles);
+        return nibbles[index];
+    }
+
+    Path tail(size_t index) const
+    {
+        assert(index > 0);
+        assert(index < num_nibbles);
+        Path p{{}};
+        p.num_nibbles = num_nibbles - index;
+        std::memcpy(p.nibbles, &nibbles[index], p.num_nibbles);
+        return p;
+    }
+
+    Path head(size_t size) const
+    {
+        assert(size > 0);
+        assert(size < num_nibbles);
+        Path p{{}};
+        p.num_nibbles = size;
+        std::memcpy(p.nibbles, nibbles, size);
+        return p;
+    }
+
+    [[nodiscard]] bytes encode(bool extended) const
+    {
+        bytes bs;
+        const auto is_even = num_nibbles % 2 == 0;
+        if (is_even)
+            bs.push_back(0x00);
+        else
+            bs.push_back(0x10 | nibbles[0]);
+        for (size_t i = is_even ? 0 : 1; i < num_nibbles; ++i)
+        {
+            const auto h = nibbles[i++];
+            const auto l = nibbles[i];
+            assert(h <= 0x0f);
+            assert(l <= 0x0f);
+            bs.push_back(uint8_t((h << 4) | l));
+        }
+        if (!extended)
+            bs[0] |= 0x20;
+        return bs;
+    }
+};
+
 struct BranchNode
 {
     hash256 items[16];
@@ -304,7 +369,7 @@ TEST(state, storage_trie_v1)
         "d9aa83255221f68fdd4931f73f8fe6ea30c191a9619b5fc60ce2914eee1e7e54");
 }
 
-TEST(state, trie_ex1)
+TEST(state, DISABLED_trie_ex1)
 {
     Trie trie;
     const auto k = to_bytes("\x01\x02\x03");
@@ -325,20 +390,21 @@ TEST(state, trie_branch_node)
     const auto v1 = to_bytes("v___________________________1");
     const auto v2 = to_bytes("v___________________________2");
 
-    const auto n1 = uint8_t(k1[0] >> 4);
-    const auto n2 = uint8_t(k2[0] >> 4);
+    const auto p1 = Path(k1);
+    const auto p2 = Path(k2);
+    const auto n1 = p1.nibble(0);
+    const auto n2 = p2.nibble(0);
     EXPECT_EQ(n1, 4);
     EXPECT_EQ(n2, 7);
 
-    auto hp1 = k1;
-    hp1[0] = 0x30 | (hp1[0] & 0x0f);
-    EXPECT_EQ(hex(hp1), "31");
-    auto hp2 = k2;
-    hp2[0] = 0x30 | (hp2[0] & 0x0f);
+    const auto lp1 = p1.tail(1);
+    EXPECT_EQ(hex(lp1.encode(false)), "31");
+    const auto lp2 = p2.tail(1);
+    EXPECT_EQ(hex(lp2.encode(false)), "3a");
 
-    const auto node1 = rlp::list(hp1, v1);
+    const auto node1 = rlp::list(lp1.encode(false), v1);
     EXPECT_EQ(hex(node1), "df319d765f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f31");
-    const auto node2 = rlp::list(hp2, v2);
+    const auto node2 = rlp::list(lp2.encode(false), v2);
 
 
     BranchNode branch;
@@ -365,20 +431,21 @@ TEST(state, trie_extension_node)
     const auto v1 = to_bytes("v___________________________1");
     const auto v2 = to_bytes("v___________________________2");
 
-    const auto common_prefix = k1.substr(0, 2);
-    EXPECT_EQ(common_prefix, k2.substr(0, 2));
-    const auto n1 = uint8_t(k1[2] >> 4);
-    const auto n2 = uint8_t(k2[2] >> 4);
+    const auto p1 = Path(k1);
+    const auto p2 = Path(k2);
+    const auto common_p = p1.head(4);
+    const auto n1 = p1.nibble(4);
+    const auto n2 = p2.nibble(4);
     EXPECT_EQ(n1, 4);
     EXPECT_EQ(n2, 5);
 
-    const auto hp1 = bytes{uint8_t(0x30 | (k1[2] & 0x0f))};
-    EXPECT_EQ(hex(hp1), "31");
-    const auto hp2 = bytes{uint8_t(0x30 | (k2[2] & 0x0f))};
+    const auto hp1 = p1.tail(5);
+    EXPECT_EQ(hex(hp1.encode(false)), "31");
+    const auto hp2 = p2.tail(5);
 
-    const auto node1 = rlp::list(hp1, v1);
+    const auto node1 = rlp::list(hp1.encode(false), v1);
     EXPECT_EQ(hex(node1), "df319d765f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f31");
-    const auto node2 = rlp::list(hp2, v2);
+    const auto node2 = rlp::list(hp2.encode(false), v2);
 
 
     BranchNode branch;
@@ -390,8 +457,7 @@ TEST(state, trie_extension_node)
     EXPECT_EQ(
         hex(branch.hash()), "1aaa6f712413b9a115730852323deb5f5d796c29151a60a1f55f41a25354cd26");
 
-    const auto hp_prefix = bytes{0x00} + common_prefix;
-    const auto ext = rlp::list(hp_prefix, branch.hash());
+    const auto ext = rlp::list(common_p.encode(true), branch.hash());
     EXPECT_EQ(
         hex(keccak256(ext)), "3eefc183db443d44810b7d925684eb07256e691d5c9cb13215660107121454f9");
 
@@ -411,18 +477,21 @@ TEST(state, trie_extension_node2)
     const auto v1 = to_bytes("v___________________________1");
     const auto v2 = to_bytes("v___________________________2");
 
-    const auto n1 = uint8_t(k1[1] & 0x0f);
-    const auto n2 = uint8_t(k2[1] & 0x0f);
+    const auto p1 = Path(k1);
+    const auto p2 = Path(k2);
+
+    const auto n1 = p1.nibble(3);
+    const auto n2 = p2.nibble(3);
     EXPECT_EQ(n1, 8);
     EXPECT_EQ(n2, 9);
 
-    const auto hp1 = bytes{0x20} + k1.substr(2);
-    EXPECT_EQ(hex(hp1), "2041");
-    const auto hp2 = bytes{0x20} + k2.substr(2);
+    const auto hp1 = p1.tail(4);
+    EXPECT_EQ(hex(hp1.encode(false)), "2041");
+    const auto hp2 = p2.tail(4);
 
-    const auto node1 = rlp::list(hp1, v1);
+    const auto node1 = rlp::list(hp1.encode(false), v1);
     EXPECT_EQ(hex(node1), "e18220419d765f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f31");
-    const auto node2 = rlp::list(hp2, v2);
+    const auto node2 = rlp::list(hp2.encode(false), v2);
     EXPECT_EQ(hex(node2), "e182205a9d765f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f32");
 
     BranchNode branch;
@@ -434,9 +503,8 @@ TEST(state, trie_extension_node2)
     EXPECT_EQ(
         hex(branch.hash()), "01746f8ab5a4cc5d6175cbd9ea9603357634ec06b2059f90710243f098e0ee82");
 
-    const auto hp_prefix =
-        bytes{uint8_t(0x10 | (k1[0] >> 4)), uint8_t((k1[0] << 4) | (k1[1] >> 4))};
-    const auto ext = rlp::list(hp_prefix, branch.hash());
+    const auto prefix = p1.head(3);
+    const auto ext = rlp::list(prefix.encode(true), branch.hash());
     EXPECT_EQ(
         hex(keccak256(ext)), "ac28c08fa3ff1d0d2cc9a6423abb7af3f4dcc37aa2210727e7d3009a9b4a34e8");
 
