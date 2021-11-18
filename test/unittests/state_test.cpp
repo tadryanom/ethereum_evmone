@@ -206,6 +206,20 @@ struct Path
     }
 };
 
+inline Path common_prefix(const Path& p, const Path& q)
+{
+    assert(p.num_nibbles == q.num_nibbles);
+    Path r{{}};
+    for (size_t i = 0; i < p.num_nibbles; ++i)
+    {
+        if (p.nibbles[i] != q.nibbles[i])
+            break;
+        ++r.num_nibbles;
+        r.nibbles[i] = p.nibbles[i];
+    }
+    return r;
+}
+
 struct BranchNode
 {
     hash256 items[16];
@@ -392,6 +406,7 @@ TEST(state, trie_branch_node)
 
     const auto p1 = Path(k1);
     const auto p2 = Path(k2);
+    EXPECT_EQ(common_prefix(p1, p2).num_nibbles, 0);
     const auto n1 = p1.nibble(0);
     const auto n2 = p2.nibble(0);
     EXPECT_EQ(n1, 4);
@@ -433,15 +448,16 @@ TEST(state, trie_extension_node)
 
     const auto p1 = Path(k1);
     const auto p2 = Path(k2);
-    const auto common_p = p1.head(4);
-    const auto n1 = p1.nibble(4);
-    const auto n2 = p2.nibble(4);
+    const auto common_p = common_prefix(p1, p2);
+    EXPECT_EQ(common_p.num_nibbles, 4);
+    const auto n1 = p1.nibble(common_p.num_nibbles);
+    const auto n2 = p2.nibble(common_p.num_nibbles);
     EXPECT_EQ(n1, 4);
     EXPECT_EQ(n2, 5);
 
-    const auto hp1 = p1.tail(5);
+    const auto hp1 = p1.tail(common_p.num_nibbles + 1);
     EXPECT_EQ(hex(hp1.encode(false)), "31");
-    const auto hp2 = p2.tail(5);
+    const auto hp2 = p2.tail(common_p.num_nibbles + 1);
 
     const auto node1 = rlp::list(hp1.encode(false), v1);
     EXPECT_EQ(hex(node1), "df319d765f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f31");
@@ -479,15 +495,16 @@ TEST(state, trie_extension_node2)
 
     const auto p1 = Path(k1);
     const auto p2 = Path(k2);
+    const auto prefix = common_prefix(p1, p2);
 
-    const auto n1 = p1.nibble(3);
-    const auto n2 = p2.nibble(3);
+    const auto n1 = p1.nibble(prefix.num_nibbles);
+    const auto n2 = p2.nibble(prefix.num_nibbles);
     EXPECT_EQ(n1, 8);
     EXPECT_EQ(n2, 9);
 
-    const auto hp1 = p1.tail(4);
+    const auto hp1 = p1.tail(prefix.num_nibbles + 1);
     EXPECT_EQ(hex(hp1.encode(false)), "2041");
-    const auto hp2 = p2.tail(4);
+    const auto hp2 = p2.tail(prefix.num_nibbles + 1);
 
     const auto node1 = rlp::list(hp1.encode(false), v1);
     EXPECT_EQ(hex(node1), "e18220419d765f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f31");
@@ -503,7 +520,6 @@ TEST(state, trie_extension_node2)
     EXPECT_EQ(
         hex(branch.hash()), "01746f8ab5a4cc5d6175cbd9ea9603357634ec06b2059f90710243f098e0ee82");
 
-    const auto prefix = p1.head(3);
     const auto ext = rlp::list(prefix.encode(true), branch.hash());
     EXPECT_EQ(
         hex(keccak256(ext)), "ac28c08fa3ff1d0d2cc9a6423abb7af3f4dcc37aa2210727e7d3009a9b4a34e8");
