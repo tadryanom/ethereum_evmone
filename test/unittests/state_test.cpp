@@ -336,6 +336,7 @@ struct StackTrie
         switch (nodeType)
         {
         case NodeType::null:
+            assert(keyOffset == 0);
             *this = leaf(keyOffset, k, v);
             break;
 
@@ -344,11 +345,9 @@ struct StackTrie
             const auto idx = k.nibbles[keyOffset];
             auto& child = children[idx];
             if (!child)
-            {
-                child = std::make_unique<StackTrie>();
-                child->keyOffset = keyOffset + 1;
-            }
-            child->insert(k, v);
+                child = std::make_unique<StackTrie>(leaf(keyOffset + 1, k, v));
+            else
+                child->insert(k, v);
             break;
         }
 
