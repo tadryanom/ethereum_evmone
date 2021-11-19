@@ -78,21 +78,25 @@ inline bytes string(bytes_view data)
     if (l <= 55)
         return bytes{static_cast<uint8_t>(0x80 + l)} + bytes{data};
 
-    // FIXME: Should it skip zero bytes?
     assert(data.size() <= 0xff);
     return bytes{0xb7 + 1, static_cast<uint8_t>(l)} + bytes{data};
 }
 
-inline bytes string(const hash256& b)
+inline bytes_view trim(const evmc::uint256be& v)
 {
     size_t i = 0;
-    for (; i < sizeof(b); ++i)
+    for (; i < sizeof(v); ++i)
     {
-        if (b.bytes[i] != 0)
+        if (v.bytes[i] != 0)
             break;
     }
-    const size_t l = sizeof(b) - i;
-    return string({&b.bytes[i], l});
+    const size_t l = sizeof(v) - i;
+    return {&v.bytes[i], l};
+}
+
+inline bytes string(const hash256& b)
+{
+    return string({b.bytes, sizeof(b)});
 }
 
 inline bytes string(int x)
@@ -131,7 +135,7 @@ bytes encode(const Account& a)
 {
     assert(a.storage.empty());
     assert(a.code.empty());
-    return rlp::list(a.nonce, a.balance, emptyTrieHash, emptyCodeHash);
+    return rlp::list(a.nonce, rlp::trim(a.balance), emptyTrieHash, emptyCodeHash);
 }
 }  // namespace rlp
 
@@ -225,9 +229,13 @@ struct BranchNode
 
     [[nodiscard]] bytes rlp() const
     {
-        return rlp::list(items[0], items[1], items[2], items[3], items[4], items[5], items[6],
-            items[7], items[8], items[9], items[10], items[11], items[12], items[13], items[14],
-            items[15], bytes_view{});
+        const auto f = [](const hash256& h) {
+            return (h != hash256{}) ? bytes_view{h.bytes, sizeof(h)} : bytes_view{};
+        };
+
+        return rlp::list(f(items[0]), f(items[1]), f(items[2]), f(items[3]), f(items[4]),
+            f(items[5]), f(items[6]), f(items[7]), f(items[8]), f(items[9]), f(items[10]),
+            f(items[11]), f(items[12]), f(items[13]), f(items[14]), f(items[15]), bytes_view{});
     }
 
     [[nodiscard]] hash256 hash() const { return keccak256(rlp()); }
@@ -273,11 +281,10 @@ bytes build_leaf_node(const address& addr, const Account& account)
     return rlp::list(encoded_path, value);
 }
 
-bytes build_leaf_node(const hash256& key, const hash256& value)
+bytes build_leaf_node(const hash256& key, bytes_view value)
 {
-    const auto path = keccak256(key);
-    const auto encoded_path = bytes{0x20} + bytes{path.bytes, sizeof(path)};
-    return rlp::list(encoded_path, rlp::string(value));
+    const auto encoded_path = bytes{0x20} + bytes{key.bytes, sizeof(key)};
+    return rlp::list(encoded_path, value);
 }
 
 hash256 hash_leaf_node(const address& addr, const Account& account)
@@ -441,6 +448,7 @@ struct StackTrie
 
     [[nodiscard]] hash256 hash() const
     {
+        hash256 r{};
         switch (nodeType)
         {
         case NodeType::null:
@@ -448,7 +456,8 @@ struct StackTrie
         case NodeType::leaf:
         {
             const auto node = rlp::list(key.encode(false), val);
-            return keccak256(node);
+            r = keccak256(node);
+            break;
         }
         case NodeType::branch:
         {
@@ -458,19 +467,23 @@ struct StackTrie
                 if (children[i])
                     node.insert(i, children[i]->hash());
             }
-            return node.hash();
+            r = node.hash();
+            break;
         }
         case NodeType::ext:
         {
             const auto branch = children[0].get();
             assert(branch != nullptr);
             assert(branch->nodeType == NodeType::branch);
-            return keccak256(rlp::list(key.encode(true), branch->hash()));
+            r = keccak256(rlp::list(key.encode(true), branch->hash()));
+            break;
         }
         default:
             assert(false);
         }
-        return {};
+
+        // std::cout << hex(bytes_view{key.nibbles, key.num_nibbles}) << ": " << hex(r) << "\n";
+        return r;
     }
 };
 
@@ -557,21 +570,16 @@ TEST(state, storage_trie_v1)
 {
     const auto key = 0_bytes32;
     const auto value = 0x00000000000000000000000000000000000000000000000000000000000001ff_bytes32;
-    const auto node = build_leaf_node(key, value);
+    const auto xkey = keccak256(key);
+    const auto xvalue = rlp::string(rlp::trim(value));
+    const auto node = build_leaf_node(xkey, xvalue);
     EXPECT_EQ(hex(node),
         "e6a120290decd9548b62a8d60345a988386fc84ba6bc95484008f6362f93160ef3e563838201ff");
     const auto root = keccak256(node);
     EXPECT_EQ(hex(root), "d9aa83255221f68fdd4931f73f8fe6ea30c191a9619b5fc60ce2914eee1e7e54");
 
-    Trie trie;
-    trie.insert(keccak256(key), rlp::string(value));
-    EXPECT_EQ(hex(trie.get_root_hash()),
-        "d9aa83255221f68fdd4931f73f8fe6ea30c191a9619b5fc60ce2914eee1e7e54");
-
     StackTrie st;
-    const auto xkey = keccak256(key);
-    const auto xval = rlp::string(value);
-    st.insert(Path{{xkey.bytes, sizeof(xkey)}}, xval);
+    st.insert(Path{{xkey.bytes, sizeof(xkey)}}, xvalue);
     EXPECT_EQ(hex(st.hash()), "d9aa83255221f68fdd4931f73f8fe6ea30c191a9619b5fc60ce2914eee1e7e54");
 }
 
@@ -727,60 +735,60 @@ TEST(state, trie_3keys_topologies)
     };
 
     KVH tests[][3] = {
-        // {
-        //     // {0:0, 7:0, f:0}
-        //     {"00", "v_______________________0___0",
-        //         "5cb26357b95bb9af08475be00243ceb68ade0b66b5cd816b0c18a18c612d2d21"},
-        //     {"70", "v_______________________0___1",
-        //         "8ff64309574f7a437a7ad1628e690eb7663cfde10676f8a904a8c8291dbc1603"},
-        //     {"f0", "v_______________________0___2",
-        //         "9e3a01bd8d43efb8e9d4b5506648150b8e3ed1caea596f84ee28e01a72635470"},
-        // },
-        // {
-        //     // {1:0cc, e:{1:fc, e:fc}}
-        //     {"10cc", "v_______________________1___0",
-        //         "233e9b257843f3dfdb1cce6676cdaf9e595ac96ee1b55031434d852bc7ac9185"},
-        //     {"e1fc", "v_______________________1___1",
-        //         "39c5e908ae83d0c78520c7c7bda0b3782daf594700e44546e93def8f049cca95"},
-        //     {"eefc", "v_______________________1___2",
-        //         "d789567559fd76fe5b7d9cc42f3750f942502ac1c7f2a466e2f690ec4b6c2a7c"},
-        // },
-        // {
-        //     // {1:0cc, e:{1:fc, e:fc}}
-        //     {"10cc", "v_______________________1___0",
-        //         "233e9b257843f3dfdb1cce6676cdaf9e595ac96ee1b55031434d852bc7ac9185"},
-        //     {"e1fc", "v_______________________1___1",
-        //         "39c5e908ae83d0c78520c7c7bda0b3782daf594700e44546e93def8f049cca95"},
-        //     {"eefc", "v_______________________1___2",
-        //         "d789567559fd76fe5b7d9cc42f3750f942502ac1c7f2a466e2f690ec4b6c2a7c"},
-        // },
-        // {
-        //     // {b:{a:ac, b:ac}, d:acc}
-        //     {"baac", "v_______________________2___0",
-        //         "8be1c86ba7ec4c61e14c1a9b75055e0464c2633ae66a055a24e75450156a5d42"},
-        //     {"bbac", "v_______________________2___1",
-        //         "8495159b9895a7d88d973171d737c0aace6fe6ac02a4769fff1bc43bcccce4cc"},
-        //     {"dacc", "v_______________________2___2",
-        //         "9bcfc5b220a27328deb9dc6ee2e3d46c9ebc9c69e78acda1fa2c7040602c63ca"},
-        // },
-        // {
-        //     // {0:0cccc, 2:456{0:0, 2:2}
-        //     {"00cccc", "v_______________________3___0",
-        //         "e57dc2785b99ce9205080cb41b32ebea7ac3e158952b44c87d186e6d190a6530"},
-        //     {"245600", "v_______________________3___1",
-        //         "0335354adbd360a45c1871a842452287721b64b4234dfe08760b243523c998db"},
-        //     {"245622", "v_______________________3___2",
-        //         "9e6832db0dca2b5cf81c0e0727bfde6afc39d5de33e5720bccacc183c162104e"},
-        // },
-        // {
-        //     // {1:4567{1:1c, 3:3c}, 3:0cccccc}
-        //     {"1456711c", "v_______________________4___0",
-        //         "f2389e78d98fed99f3e63d6d1623c1d4d9e8c91cb1d585de81fbc7c0e60d3529"},
-        //     {"1456733c", "v_______________________4___1",
-        //         "101189b3fab852be97a0120c03d95eefcf984d3ed639f2328527de6def55a9c0"},
-        //     {"30cccccc", "v_______________________4___2",
-        //         "3780ce111f98d15751dfde1eb21080efc7d3914b429e5c84c64db637c55405b3"},
-        // },
+        {
+            // {0:0, 7:0, f:0}
+            {"00", "v_______________________0___0",
+                "5cb26357b95bb9af08475be00243ceb68ade0b66b5cd816b0c18a18c612d2d21"},
+            {"70", "v_______________________0___1",
+                "8ff64309574f7a437a7ad1628e690eb7663cfde10676f8a904a8c8291dbc1603"},
+            {"f0", "v_______________________0___2",
+                "9e3a01bd8d43efb8e9d4b5506648150b8e3ed1caea596f84ee28e01a72635470"},
+        },
+        {
+            // {1:0cc, e:{1:fc, e:fc}}
+            {"10cc", "v_______________________1___0",
+                "233e9b257843f3dfdb1cce6676cdaf9e595ac96ee1b55031434d852bc7ac9185"},
+            {"e1fc", "v_______________________1___1",
+                "39c5e908ae83d0c78520c7c7bda0b3782daf594700e44546e93def8f049cca95"},
+            {"eefc", "v_______________________1___2",
+                "d789567559fd76fe5b7d9cc42f3750f942502ac1c7f2a466e2f690ec4b6c2a7c"},
+        },
+        {
+            // {1:0cc, e:{1:fc, e:fc}}
+            {"10cc", "v_______________________1___0",
+                "233e9b257843f3dfdb1cce6676cdaf9e595ac96ee1b55031434d852bc7ac9185"},
+            {"e1fc", "v_______________________1___1",
+                "39c5e908ae83d0c78520c7c7bda0b3782daf594700e44546e93def8f049cca95"},
+            {"eefc", "v_______________________1___2",
+                "d789567559fd76fe5b7d9cc42f3750f942502ac1c7f2a466e2f690ec4b6c2a7c"},
+        },
+        {
+            // {b:{a:ac, b:ac}, d:acc}
+            {"baac", "v_______________________2___0",
+                "8be1c86ba7ec4c61e14c1a9b75055e0464c2633ae66a055a24e75450156a5d42"},
+            {"bbac", "v_______________________2___1",
+                "8495159b9895a7d88d973171d737c0aace6fe6ac02a4769fff1bc43bcccce4cc"},
+            {"dacc", "v_______________________2___2",
+                "9bcfc5b220a27328deb9dc6ee2e3d46c9ebc9c69e78acda1fa2c7040602c63ca"},
+        },
+        {
+            // {0:0cccc, 2:456{0:0, 2:2}
+            {"00cccc", "v_______________________3___0",
+                "e57dc2785b99ce9205080cb41b32ebea7ac3e158952b44c87d186e6d190a6530"},
+            {"245600", "v_______________________3___1",
+                "0335354adbd360a45c1871a842452287721b64b4234dfe08760b243523c998db"},
+            {"245622", "v_______________________3___2",
+                "9e6832db0dca2b5cf81c0e0727bfde6afc39d5de33e5720bccacc183c162104e"},
+        },
+        {
+            // {1:4567{1:1c, 3:3c}, 3:0cccccc}
+            {"1456711c", "v_______________________4___0",
+                "f2389e78d98fed99f3e63d6d1623c1d4d9e8c91cb1d585de81fbc7c0e60d3529"},
+            {"1456733c", "v_______________________4___1",
+                "101189b3fab852be97a0120c03d95eefcf984d3ed639f2328527de6def55a9c0"},
+            {"30cccccc", "v_______________________4___2",
+                "3780ce111f98d15751dfde1eb21080efc7d3914b429e5c84c64db637c55405b3"},
+        },
         {
             // 8800{1:f, 2:e, 3:d}
             {"88001f", "v_______________________5___0",
