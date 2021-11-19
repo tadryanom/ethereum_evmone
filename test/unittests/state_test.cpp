@@ -298,8 +298,7 @@ enum class NodeType
     null,
     leaf,
     ext,
-    branch,
-    hash
+    branch
 };
 
 struct StackTrie
@@ -361,10 +360,8 @@ struct StackTrie
             break;
         }
 
-        case NodeType::hash:
         default:
             assert(false);
-            break;
         }
     }
 
@@ -372,6 +369,8 @@ struct StackTrie
     {
         switch (nodeType)
         {
+        case NodeType::null:
+            return emptyTrieHash;
         case NodeType::leaf:
         {
             const auto node = rlp::list(key.encode(false), val);
@@ -434,8 +433,8 @@ TEST(state, empty_trie)
     const auto empty_trie_hash = keccak256(rlp_null);
     EXPECT_EQ(empty_trie_hash, emptyTrieHash);
 
-    Trie trie;
-    EXPECT_EQ(trie.get_root_hash(), emptyTrieHash);
+    StackTrie trie;
+    EXPECT_EQ(trie.hash(), emptyTrieHash);
 }
 
 TEST(state, hashed_address)
@@ -472,6 +471,12 @@ TEST(state, single_account_v1)
     trie.insert(keccak256(addr), rlp::encode(a));
     EXPECT_EQ(hex(trie.get_root_hash()),
         "084f337237951e425716a04fb0aaa74111eda9d9c61767f2497697d0a201c92e");
+
+    StackTrie st;
+    const auto xkey = keccak256(addr);
+    const auto xval = rlp::encode(a);
+    st.insert(Path{{xkey.bytes, sizeof(xkey)}}, xval);
+    EXPECT_EQ(hex(st.hash()), "084f337237951e425716a04fb0aaa74111eda9d9c61767f2497697d0a201c92e");
 }
 
 TEST(state, storage_trie_v1)
@@ -636,4 +641,47 @@ TEST(state, trie_extension_node2)
     st.insert(p1, v1);
     st.insert(p2, v2);
     EXPECT_EQ(hex(st.hash()), "ac28c08fa3ff1d0d2cc9a6423abb7af3f4dcc37aa2210727e7d3009a9b4a34e8");
+}
+
+TEST(state, trie_3keys_topologies)
+{
+    struct KVH
+    {
+        const char* key_hex;
+        const char* value;
+        const char* hash_hex;
+    };
+
+    KVH tests[][3] = {
+        {
+            // {0:0, 7:0, f:0}
+            {"00", "v_______________________0___0",
+                "5cb26357b95bb9af08475be00243ceb68ade0b66b5cd816b0c18a18c612d2d21"},
+            {"70", "v_______________________0___1",
+                "8ff64309574f7a437a7ad1628e690eb7663cfde10676f8a904a8c8291dbc1603"},
+            {"f0", "v_______________________0___2",
+                "9e3a01bd8d43efb8e9d4b5506648150b8e3ed1caea596f84ee28e01a72635470"},
+        },
+        {
+            // {1:0cc, e:{1:fc, e:fc}}
+            {"10cc", "v_______________________1___0",
+                "233e9b257843f3dfdb1cce6676cdaf9e595ac96ee1b55031434d852bc7ac9185"},
+            {"e1fc", "v_______________________1___1",
+                "39c5e908ae83d0c78520c7c7bda0b3782daf594700e44546e93def8f049cca95"},
+            {"eefc", "v_______________________1___2",
+                "d789567559fd76fe5b7d9cc42f3750f942502ac1c7f2a466e2f690ec4b6c2a7c"},
+        },
+    };
+
+    for (const auto& test : tests)
+    {
+        StackTrie st;
+        for (const auto& kv: test)
+        {
+            const auto k = from_hex(kv.key_hex);
+            const auto v = to_bytes(kv.value);
+            st.insert(Path{k}, v);
+            EXPECT_EQ(hex(st.hash()), kv.hash_hex);
+        }
+    }
 }
