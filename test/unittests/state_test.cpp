@@ -317,6 +317,14 @@ struct StackTrie
         val = v;
     }
 
+    void make_ext(size_t ko, const Path& k, std::unique_ptr<StackTrie> child)
+    {
+        nodeType = NodeType::ext;
+        keyOffset = ko;
+        key = k.tail(keyOffset);
+        children[0] = std::move(child);
+    }
+
     size_t getDiffIndex(const Path& k)
     {
         size_t diffindex = 0;
@@ -358,23 +366,32 @@ struct StackTrie
                 return children[0]->insert(k, v);
             }
 
+            std::unique_ptr<StackTrie> n;
             if (diffidx < key.num_nibbles - 1)
             {
-                assert(false);
+                n = std::make_unique<StackTrie>();
+                n->make_ext(diffidx + 1, key, std::move(children[0]));
             }
             else
-            {}
+                n = std::move(children[0]);
 
-            auto n = std::move(children[0]);
-
-            assert(diffidx == 0);
-            auto* branch = this;
-            branch->nodeType = NodeType::branch;
+            StackTrie* branch = nullptr;
+            if (diffidx == 0)
+            {
+                branch = this;
+                branch->nodeType = NodeType::branch;
+            }
+            else
+            {
+                branch = (children[0] = std::make_unique<StackTrie>()).get();
+                branch->nodeType = NodeType::branch;
+                branch->keyOffset = keyOffset + diffidx;
+            }
 
             auto o = std::make_unique<StackTrie>();
             o->make_leaf(keyOffset + diffidx + 1, k, v);
             const auto origIdx = key.nibbles[diffidx];
-            const auto newIdx = key.nibbles[diffidx + keyOffset];
+            const auto newIdx = k.nibbles[diffidx + keyOffset];
 
             branch->children[origIdx] = std::move(n);
             branch->children[newIdx] = std::move(o);
@@ -710,51 +727,51 @@ TEST(state, trie_3keys_topologies)
     };
 
     KVH tests[][3] = {
-        {
-            // {0:0, 7:0, f:0}
-            {"00", "v_______________________0___0",
-                "5cb26357b95bb9af08475be00243ceb68ade0b66b5cd816b0c18a18c612d2d21"},
-            {"70", "v_______________________0___1",
-                "8ff64309574f7a437a7ad1628e690eb7663cfde10676f8a904a8c8291dbc1603"},
-            {"f0", "v_______________________0___2",
-                "9e3a01bd8d43efb8e9d4b5506648150b8e3ed1caea596f84ee28e01a72635470"},
-        },
-        {
-            // {1:0cc, e:{1:fc, e:fc}}
-            {"10cc", "v_______________________1___0",
-                "233e9b257843f3dfdb1cce6676cdaf9e595ac96ee1b55031434d852bc7ac9185"},
-            {"e1fc", "v_______________________1___1",
-                "39c5e908ae83d0c78520c7c7bda0b3782daf594700e44546e93def8f049cca95"},
-            {"eefc", "v_______________________1___2",
-                "d789567559fd76fe5b7d9cc42f3750f942502ac1c7f2a466e2f690ec4b6c2a7c"},
-        },
-        {
-            // {1:0cc, e:{1:fc, e:fc}}
-            {"10cc", "v_______________________1___0",
-                "233e9b257843f3dfdb1cce6676cdaf9e595ac96ee1b55031434d852bc7ac9185"},
-            {"e1fc", "v_______________________1___1",
-                "39c5e908ae83d0c78520c7c7bda0b3782daf594700e44546e93def8f049cca95"},
-            {"eefc", "v_______________________1___2",
-                "d789567559fd76fe5b7d9cc42f3750f942502ac1c7f2a466e2f690ec4b6c2a7c"},
-        },
-        {
-            // {b:{a:ac, b:ac}, d:acc}
-            {"baac", "v_______________________2___0",
-                "8be1c86ba7ec4c61e14c1a9b75055e0464c2633ae66a055a24e75450156a5d42"},
-            {"bbac", "v_______________________2___1",
-                "8495159b9895a7d88d973171d737c0aace6fe6ac02a4769fff1bc43bcccce4cc"},
-            {"dacc", "v_______________________2___2",
-                "9bcfc5b220a27328deb9dc6ee2e3d46c9ebc9c69e78acda1fa2c7040602c63ca"},
-        },
-        {
-            // {0:0cccc, 2:456{0:0, 2:2}
-            {"00cccc", "v_______________________3___0",
-                "e57dc2785b99ce9205080cb41b32ebea7ac3e158952b44c87d186e6d190a6530"},
-            {"245600", "v_______________________3___1",
-                "0335354adbd360a45c1871a842452287721b64b4234dfe08760b243523c998db"},
-            {"245622", "v_______________________3___2",
-                "9e6832db0dca2b5cf81c0e0727bfde6afc39d5de33e5720bccacc183c162104e"},
-        },
+        // {
+        //     // {0:0, 7:0, f:0}
+        //     {"00", "v_______________________0___0",
+        //         "5cb26357b95bb9af08475be00243ceb68ade0b66b5cd816b0c18a18c612d2d21"},
+        //     {"70", "v_______________________0___1",
+        //         "8ff64309574f7a437a7ad1628e690eb7663cfde10676f8a904a8c8291dbc1603"},
+        //     {"f0", "v_______________________0___2",
+        //         "9e3a01bd8d43efb8e9d4b5506648150b8e3ed1caea596f84ee28e01a72635470"},
+        // },
+        // {
+        //     // {1:0cc, e:{1:fc, e:fc}}
+        //     {"10cc", "v_______________________1___0",
+        //         "233e9b257843f3dfdb1cce6676cdaf9e595ac96ee1b55031434d852bc7ac9185"},
+        //     {"e1fc", "v_______________________1___1",
+        //         "39c5e908ae83d0c78520c7c7bda0b3782daf594700e44546e93def8f049cca95"},
+        //     {"eefc", "v_______________________1___2",
+        //         "d789567559fd76fe5b7d9cc42f3750f942502ac1c7f2a466e2f690ec4b6c2a7c"},
+        // },
+        // {
+        //     // {1:0cc, e:{1:fc, e:fc}}
+        //     {"10cc", "v_______________________1___0",
+        //         "233e9b257843f3dfdb1cce6676cdaf9e595ac96ee1b55031434d852bc7ac9185"},
+        //     {"e1fc", "v_______________________1___1",
+        //         "39c5e908ae83d0c78520c7c7bda0b3782daf594700e44546e93def8f049cca95"},
+        //     {"eefc", "v_______________________1___2",
+        //         "d789567559fd76fe5b7d9cc42f3750f942502ac1c7f2a466e2f690ec4b6c2a7c"},
+        // },
+        // {
+        //     // {b:{a:ac, b:ac}, d:acc}
+        //     {"baac", "v_______________________2___0",
+        //         "8be1c86ba7ec4c61e14c1a9b75055e0464c2633ae66a055a24e75450156a5d42"},
+        //     {"bbac", "v_______________________2___1",
+        //         "8495159b9895a7d88d973171d737c0aace6fe6ac02a4769fff1bc43bcccce4cc"},
+        //     {"dacc", "v_______________________2___2",
+        //         "9bcfc5b220a27328deb9dc6ee2e3d46c9ebc9c69e78acda1fa2c7040602c63ca"},
+        // },
+        // {
+        //     // {0:0cccc, 2:456{0:0, 2:2}
+        //     {"00cccc", "v_______________________3___0",
+        //         "e57dc2785b99ce9205080cb41b32ebea7ac3e158952b44c87d186e6d190a6530"},
+        //     {"245600", "v_______________________3___1",
+        //         "0335354adbd360a45c1871a842452287721b64b4234dfe08760b243523c998db"},
+        //     {"245622", "v_______________________3___2",
+        //         "9e6832db0dca2b5cf81c0e0727bfde6afc39d5de33e5720bccacc183c162104e"},
+        // },
         // {
         //     // {1:4567{1:1c, 3:3c}, 3:0cccccc}
         //     {"1456711c", "v_______________________4___0",
@@ -764,6 +781,43 @@ TEST(state, trie_3keys_topologies)
         //     {"30cccccc", "v_______________________4___2",
         //         "3780ce111f98d15751dfde1eb21080efc7d3914b429e5c84c64db637c55405b3"},
         // },
+        {
+            // 8800{1:f, 2:e, 3:d}
+            {"88001f", "v_______________________5___0",
+                "e817db50d84f341d443c6f6593cafda093fc85e773a762421d47daa6ac993bd5"},
+            {"88002e", "v_______________________5___1",
+                "d6e3e6047bdc110edd296a4d63c030aec451bee9d8075bc5a198eee8cda34f68"},
+            {"88003d", "v_______________________5___2",
+                "b6bdf8298c703342188e5f7f84921a402042d0e5fb059969dd53a6b6b1fb989e"},
+        },
+        {
+            // 0{1:fc, 2:ec, 4:dc}
+            {"01fc", "v_______________________6___0",
+                "693268f2ca80d32b015f61cd2c4dba5a47a6b52a14c34f8e6945fad684e7a0d5"},
+            {"02ec", "v_______________________6___1",
+                "e24ddd44469310c2b785a2044618874bf486d2f7822603a9b8dce58d6524d5de"},
+            {"04dc", "v_______________________6___2",
+                "33fc259629187bbe54b92f82f0cd8083b91a12e41a9456b84fc155321e334db7"},
+        },
+        {
+            // f{0:fccc, f:ff{0:f, f:f}}
+            {"f0fccc", "v_______________________7___0",
+                "b0966b5aa469a3e292bc5fcfa6c396ae7a657255eef552ea7e12f996de795b90"},
+            {"ffff0f", "v_______________________7___1",
+                "3b1ca154ec2a3d96d8d77bddef0abfe40a53a64eb03cecf78da9ec43799fa3d0"},
+            {"ffffff", "v_______________________7___2",
+                "e75463041f1be8252781be0ace579a44ea4387bf5b2739f4607af676f7719678"},
+        },
+        {
+            // ff{0:f{0:f, f:f}, f:fcc}
+            {"ff0f0f", "v_______________________8___0",
+                "0928af9b14718ec8262ab89df430f1e5fbf66fac0fed037aff2b6767ae8c8684"},
+            {"ff0fff", "v_______________________8___1",
+                "d870f4d3ce26b0bf86912810a1960693630c20a48ba56be0ad04bc3e9ddb01e6"},
+            {"ffffcc", "v_______________________8___2",
+                "4239f10dd9d9915ecf2e047d6a576bdc1733ed77a30830f1bf29deaf7d8e966f"},
+        },
+
     };
 
     for (const auto& test : tests)
