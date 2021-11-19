@@ -342,6 +342,7 @@ struct StackTrie
 
         case NodeType::branch:
         {
+            assert(key.num_nibbles == 0);
             const auto idx = k.nibbles[keyOffset];
             auto& child = children[idx];
             if (!child)
@@ -443,6 +444,7 @@ struct StackTrie
         }
         case NodeType::branch:
         {
+            assert(key.num_nibbles == 0);
             BranchNode node;
             for (uint8_t i = 0; i < std::size(children); ++i)
             {
