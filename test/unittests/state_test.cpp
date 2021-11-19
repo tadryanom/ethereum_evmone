@@ -309,20 +309,16 @@ struct StackTrie
     size_t keyOffset = 0;
     std::unique_ptr<StackTrie> children[16];
 
-    void make_leaf(size_t ko, const Path& k, bytes_view v)
+    /// Named constructor for a leaf node.
+    static StackTrie leaf(size_t ko, const Path& k, bytes_view v)
     {
-        nodeType = NodeType::leaf;
-        keyOffset = ko;
-        key = k.tail(keyOffset);
-        val = v;
+        return {NodeType::leaf, bytes{v}, k.tail(ko), ko, {}};
     }
 
-    void make_ext(size_t ko, const Path& k, std::unique_ptr<StackTrie> child)
+    /// Named constructor for an extended node.
+    static StackTrie ext(size_t ko, const Path& k, std::unique_ptr<StackTrie> child)
     {
-        nodeType = NodeType::ext;
-        keyOffset = ko;
-        key = k.tail(keyOffset);
-        children[0] = std::move(child);
+        return {NodeType::ext, {}, k.tail(ko), ko, {std::move(child)}};
     }
 
     size_t getDiffIndex(const Path& k)
@@ -340,7 +336,7 @@ struct StackTrie
         switch (nodeType)
         {
         case NodeType::null:
-            make_leaf(keyOffset, k, v);
+            *this = leaf(keyOffset, k, v);
             break;
 
         case NodeType::branch:
@@ -368,10 +364,7 @@ struct StackTrie
 
             std::unique_ptr<StackTrie> n;
             if (diffidx < key.num_nibbles - 1)
-            {
-                n = std::make_unique<StackTrie>();
-                n->make_ext(diffidx + 1, key, std::move(children[0]));
-            }
+                n = std::make_unique<StackTrie>(ext(diffidx + 1, key, std::move(children[0])));
             else
                 n = std::move(children[0]);
 
@@ -388,13 +381,12 @@ struct StackTrie
                 branch->keyOffset = keyOffset + diffidx;
             }
 
-            auto o = std::make_unique<StackTrie>();
-            o->make_leaf(keyOffset + diffidx + 1, k, v);
             const auto origIdx = key.nibbles[diffidx];
             const auto newIdx = k.nibbles[diffidx + keyOffset];
 
             branch->children[origIdx] = std::move(n);
-            branch->children[newIdx] = std::move(o);
+            branch->children[newIdx] =
+                std::make_unique<StackTrie>(leaf(keyOffset + diffidx + 1, k, v));
             key = key.head(diffidx);
             break;
         }
@@ -419,15 +411,12 @@ struct StackTrie
             }
 
             const auto origIdx = key.nibbles[diffidx];
-            auto me = std::make_unique<StackTrie>();
-            me->make_leaf(diffidx + 1, key, val);
-            branch->children[origIdx] = std::move(me);
+            branch->children[origIdx] = std::make_unique<StackTrie>(leaf(diffidx + 1, key, val));
 
             const auto newIdx = k.nibbles[diffidx + keyOffset];
             assert(origIdx != newIdx);
-            auto he = std::make_unique<StackTrie>();
-            he->make_leaf(branch->keyOffset + 1, k, v);
-            branch->children[newIdx] = std::move(he);
+            branch->children[newIdx] =
+                std::make_unique<StackTrie>(leaf(branch->keyOffset + 1, k, v));
 
             key = key.head(diffidx);
             val = {};
