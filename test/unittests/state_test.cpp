@@ -241,37 +241,6 @@ struct BranchNode
     [[nodiscard]] hash256 hash() const { return keccak256(rlp()); }
 };
 
-class Trie
-{
-    std::map<bytes, bytes> m_map;
-
-public:
-    static bytes build_leaf_node(bytes_view path, bytes_view value)
-    {
-        const auto encoded_path = bytes{0x20} + bytes{path};
-        return rlp::list(encoded_path, value);
-    }
-
-    void insert(bytes k, bytes v) { m_map[std::move(k)] = std::move(v); }
-
-    /// Helper
-    void insert(hash256 k, bytes v) { insert(bytes{k.bytes, sizeof(k)}, std::move(v)); }
-
-    [[nodiscard]] hash256 get_root_hash() const
-    {
-        const auto size = std::size(m_map);
-        if (size == 0)
-            return emptyTrieHash;
-        else if (size == 1)
-        {
-            const auto& [k, v] = *m_map.begin();
-            return keccak256(build_leaf_node(k, v));
-        }
-
-        return {};
-    }
-};
-
 using State = std::map<address, Account>;
 bytes build_leaf_node(const address& addr, const Account& account)
 {
@@ -287,15 +256,9 @@ bytes build_leaf_node(const hash256& key, bytes_view value)
     return rlp::list(encoded_path, value);
 }
 
-hash256 hash_leaf_node(const address& addr, const Account& account)
-{
-    const auto node = build_leaf_node(addr, account);
-    return keccak256(node);
-}
-
 /// Insert-only Trie implementation for getting the root hash out of (key, value) pairs.
 /// Based on StackTrie from go-ethereum.
-class StackTrie
+class Trie
 {
     enum class NodeType : uint8_t
     {
@@ -308,19 +271,19 @@ class StackTrie
     NodeType m_type{NodeType::null};
     Path m_path{{}};
     bytes m_value;
-    std::unique_ptr<StackTrie> children[16];
+    std::unique_ptr<Trie> children[16];
 
-    StackTrie(NodeType type, const Path& path, bytes_view value = {})
+    Trie(NodeType type, const Path& path, bytes_view value = {})
       : m_type{type}, m_path{path}, m_value{value}
     {}
 
     /// Named constructor for a leaf node.
-    static StackTrie leaf(const Path& k, bytes_view v) { return {NodeType::leaf, k, v}; }
+    static Trie leaf(const Path& k, bytes_view v) { return {NodeType::leaf, k, v}; }
 
     /// Named constructor for an extended node.
-    static StackTrie ext(const Path& k, std::unique_ptr<StackTrie> child)
+    static Trie ext(const Path& k, std::unique_ptr<Trie> child)
     {
-        StackTrie node{NodeType::ext, k};
+        Trie node{NodeType::ext, k};
         node.children[0] = std::move(child);
         return node;
     }
@@ -335,7 +298,7 @@ class StackTrie
     }
 
 public:
-    StackTrie() = default;
+    Trie() = default;
 
     void insert(const hash256& key, bytes_view value)
     {
@@ -356,7 +319,7 @@ public:
             const auto idx = k.nibbles[0];
             auto& child = children[idx];
             if (!child)
-                child = std::make_unique<StackTrie>(leaf(k.tail(1), v));
+                child = std::make_unique<Trie>(leaf(k.tail(1), v));
             else
                 child->insert(k.tail(1), v);
             break;
@@ -372,14 +335,13 @@ public:
                 return children[0]->insert(k.tail(diffidx), v);
             }
 
-            std::unique_ptr<StackTrie> n;
+            std::unique_ptr<Trie> n;
             if (diffidx < m_path.num_nibbles - 1)
-                n = std::make_unique<StackTrie>(
-                    ext(m_path.tail(diffidx + 1), std::move(children[0])));
+                n = std::make_unique<Trie>(ext(m_path.tail(diffidx + 1), std::move(children[0])));
             else
                 n = std::move(children[0]);
 
-            StackTrie* branch = nullptr;
+            Trie* branch = nullptr;
             if (diffidx == 0)
             {
                 branch = this;
@@ -387,7 +349,7 @@ public:
             }
             else
             {
-                branch = (children[0] = std::make_unique<StackTrie>()).get();
+                branch = (children[0] = std::make_unique<Trie>()).get();
                 branch->m_type = NodeType::branch;
             }
 
@@ -395,7 +357,7 @@ public:
             const auto newIdx = k.nibbles[diffidx];
 
             branch->children[origIdx] = std::move(n);
-            branch->children[newIdx] = std::make_unique<StackTrie>(leaf(k.tail(diffidx + 1), v));
+            branch->children[newIdx] = std::make_unique<Trie>(leaf(k.tail(diffidx + 1), v));
             m_path = m_path.head(diffidx);
             break;
         }
@@ -405,7 +367,7 @@ public:
             // TODO: Add assert for k == key.
             const auto diffidx = diff_index(m_path, k);
 
-            StackTrie* branch = nullptr;
+            Trie* branch = nullptr;
             if (diffidx == 0)  // Convert into a branch.
             {
                 m_type = NodeType::branch;
@@ -414,17 +376,17 @@ public:
             else
             {
                 m_type = NodeType::ext;
-                branch = (children[0] = std::make_unique<StackTrie>()).get();
+                branch = (children[0] = std::make_unique<Trie>()).get();
                 branch->m_type = NodeType::branch;
             }
 
             const auto origIdx = m_path.nibbles[diffidx];
             branch->children[origIdx] =
-                std::make_unique<StackTrie>(leaf(m_path.tail(diffidx + 1), m_value));
+                std::make_unique<Trie>(leaf(m_path.tail(diffidx + 1), m_value));
 
             const auto newIdx = k.nibbles[diffidx];
             assert(origIdx != newIdx);
-            branch->children[newIdx] = std::make_unique<StackTrie>(leaf(k.tail(diffidx + 1), v));
+            branch->children[newIdx] = std::make_unique<Trie>(leaf(k.tail(diffidx + 1), v));
 
             m_path = m_path.head(diffidx);
             m_value = {};
@@ -511,7 +473,7 @@ TEST(state, empty_trie)
     const auto empty_trie_hash = keccak256(rlp_null);
     EXPECT_EQ(empty_trie_hash, emptyTrieHash);
 
-    StackTrie trie;
+    Trie trie;
     EXPECT_EQ(trie.hash(), emptyTrieHash);
 }
 
@@ -542,19 +504,11 @@ TEST(state, single_account_v1)
     const auto addr = 0x0000000000000000000000000000000000000002_address;
     a.set_balance(1);
 
-    const auto h = hash_leaf_node(addr, a);
-    EXPECT_EQ(hex(h), "084f337237951e425716a04fb0aaa74111eda9d9c61767f2497697d0a201c92e");
-
     Trie trie;
-    trie.insert(keccak256(addr), rlp::encode(a));
-    EXPECT_EQ(hex(trie.get_root_hash()),
-        "084f337237951e425716a04fb0aaa74111eda9d9c61767f2497697d0a201c92e");
-
-    StackTrie st;
     const auto xkey = keccak256(addr);
     const auto xval = rlp::encode(a);
-    st.insert(Path{{xkey.bytes, sizeof(xkey)}}, xval);
-    EXPECT_EQ(hex(st.hash()), "084f337237951e425716a04fb0aaa74111eda9d9c61767f2497697d0a201c92e");
+    trie.insert(Path{{xkey.bytes, sizeof(xkey)}}, xval);
+    EXPECT_EQ(hex(trie.hash()), "084f337237951e425716a04fb0aaa74111eda9d9c61767f2497697d0a201c92e");
 }
 
 TEST(state, storage_trie_v1)
@@ -569,14 +523,14 @@ TEST(state, storage_trie_v1)
     const auto root = keccak256(node);
     EXPECT_EQ(hex(root), "d9aa83255221f68fdd4931f73f8fe6ea30c191a9619b5fc60ce2914eee1e7e54");
 
-    StackTrie st;
+    Trie st;
     st.insert(xkey, xvalue);
     EXPECT_EQ(hex(st.hash()), "d9aa83255221f68fdd4931f73f8fe6ea30c191a9619b5fc60ce2914eee1e7e54");
 }
 
 TEST(state, trie_ex1)
 {
-    StackTrie trie;
+    Trie trie;
     const auto k = to_bytes("\x01\x02\x03");
     const auto v = to_bytes("hello");
     trie.insert(Path{k}, v);
@@ -585,7 +539,6 @@ TEST(state, trie_ex1)
 
 TEST(state, trie_branch_node)
 {
-    Trie trie;
     const auto k1 = to_bytes("A");
     const auto k2 = to_bytes("z");
     const auto v1 = to_bytes("v___________________________1");
@@ -608,7 +561,6 @@ TEST(state, trie_branch_node)
     EXPECT_EQ(hex(node1), "df319d765f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f31");
     const auto node2 = rlp::list(lp2.encode(false), v2);
 
-
     BranchNode branch;
     branch.insert(n1, keccak256(node1));
     branch.insert(n2, keccak256(node2));
@@ -618,7 +570,7 @@ TEST(state, trie_branch_node)
     EXPECT_EQ(
         hex(branch.hash()), "56e911635579e0f86dce3c116af12b30448e01cc634aac127e037efbd29e7f9f");
 
-    StackTrie st;
+    Trie st;
     st.insert(Path{k1}, v1);
     st.insert(Path{k2}, v2);
     EXPECT_EQ(hex(st.hash()), "56e911635579e0f86dce3c116af12b30448e01cc634aac127e037efbd29e7f9f");
@@ -626,7 +578,6 @@ TEST(state, trie_branch_node)
 
 TEST(state, trie_extension_node)
 {
-    Trie trie;
     const auto k1 = to_bytes("XXA");
     const auto k2 = to_bytes("XXZ");
     const auto v1 = to_bytes("v___________________________1");
@@ -663,7 +614,7 @@ TEST(state, trie_extension_node)
     EXPECT_EQ(
         hex(keccak256(ext)), "3eefc183db443d44810b7d925684eb07256e691d5c9cb13215660107121454f9");
 
-    StackTrie st;
+    Trie st;
     st.insert(p1, v1);
     st.insert(p2, v2);
     EXPECT_EQ(hex(st.hash()), "3eefc183db443d44810b7d925684eb07256e691d5c9cb13215660107121454f9");
@@ -672,7 +623,6 @@ TEST(state, trie_extension_node)
 
 TEST(state, trie_extension_node2)
 {
-    Trie trie;
     const auto k1 = to_bytes("XXA");
     const auto k2 = to_bytes("XYZ");
     const auto v1 = to_bytes("v___________________________1");
@@ -709,7 +659,7 @@ TEST(state, trie_extension_node2)
     EXPECT_EQ(
         hex(keccak256(ext)), "ac28c08fa3ff1d0d2cc9a6423abb7af3f4dcc37aa2210727e7d3009a9b4a34e8");
 
-    StackTrie st;
+    Trie st;
     st.insert(p1, v1);
     st.insert(p2, v2);
     EXPECT_EQ(hex(st.hash()), "ac28c08fa3ff1d0d2cc9a6423abb7af3f4dcc37aa2210727e7d3009a9b4a34e8");
@@ -826,7 +776,7 @@ TEST(state, trie_3keys_topologies)
 
     for (const auto& test : tests)
     {
-        StackTrie st;
+        Trie st;
         for (const auto& kv : test)
         {
             const auto k = from_hex(kv.key_hex);
@@ -895,7 +845,7 @@ TEST(state, trie_4keys_extended_node_split)
 
     for (const auto& test : tests)
     {
-        StackTrie st;
+        Trie st;
         for (const auto& kv : test)
         {
             const auto k = from_hex(kv.key_hex);
