@@ -293,16 +293,18 @@ hash256 hash_leaf_node(const address& addr, const Account& account)
     return keccak256(node);
 }
 
-enum class NodeType
-{
-    null,
-    leaf,
-    ext,
-    branch
-};
-
+/// Insert-only Trie implementation for getting the root hash out of (key, value) pairs.
+/// Based on StackTrie from go-ethereum.
 class StackTrie
 {
+    enum class NodeType : uint8_t
+    {
+        null,
+        leaf,
+        ext,
+        branch
+    };
+
     NodeType m_type{NodeType::null};
     Path m_path{{}};
     bytes m_value;
@@ -334,6 +336,11 @@ class StackTrie
 
 public:
     StackTrie() = default;
+
+    void insert(const hash256& key, bytes_view value)
+    {
+        insert(Path{{key.bytes, sizeof(key)}}, value);
+    }
 
     void insert(const Path& k, bytes_view v)
     {
@@ -563,7 +570,7 @@ TEST(state, storage_trie_v1)
     EXPECT_EQ(hex(root), "d9aa83255221f68fdd4931f73f8fe6ea30c191a9619b5fc60ce2914eee1e7e54");
 
     StackTrie st;
-    st.insert(Path{{xkey.bytes, sizeof(xkey)}}, xvalue);
+    st.insert(xkey, xvalue);
     EXPECT_EQ(hex(st.hash()), "d9aa83255221f68fdd4931f73f8fe6ea30c191a9619b5fc60ce2914eee1e7e54");
 }
 
@@ -572,7 +579,6 @@ TEST(state, trie_ex1)
     StackTrie trie;
     const auto k = to_bytes("\x01\x02\x03");
     const auto v = to_bytes("hello");
-    EXPECT_EQ(hex(Trie::build_leaf_node(k, v)), "cb84200102038568656c6c6f");
     trie.insert(Path{k}, v);
     EXPECT_EQ(hex(trie.hash()), "82c8fd36022fbc91bd6b51580cfd941d3d9994017d59ab2e8293ae9c94c3ab6e");
 }
