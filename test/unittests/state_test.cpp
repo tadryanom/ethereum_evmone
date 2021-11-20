@@ -301,34 +301,43 @@ enum class NodeType
     branch
 };
 
-struct StackTrie
+class StackTrie
 {
-    NodeType nodeType{NodeType::null};
-    bytes val;
-    Path key{{}};
+    NodeType m_type{NodeType::null};
+    Path m_path{{}};
+    bytes m_value;
     std::unique_ptr<StackTrie> children[16];
 
+    StackTrie(NodeType type, const Path& path, bytes_view value = {})
+      : m_type{type}, m_path{path}, m_value{value}
+    {}
+
     /// Named constructor for a leaf node.
-    static StackTrie leaf(const Path& k, bytes_view v) { return {NodeType::leaf, bytes{v}, k, {}}; }
+    static StackTrie leaf(const Path& k, bytes_view v) { return {NodeType::leaf, k, v}; }
 
     /// Named constructor for an extended node.
     static StackTrie ext(const Path& k, std::unique_ptr<StackTrie> child)
     {
-        return {NodeType::ext, {}, k, {std::move(child)}};
+        StackTrie node{NodeType::ext, k};
+        node.children[0] = std::move(child);
+        return node;
     }
 
     size_t getDiffIndex(const Path& k) const
     {
         size_t diffindex = 0;
-        for (; diffindex < key.num_nibbles && key.nibbles[diffindex] == k.nibbles[diffindex];
+        for (; diffindex < m_path.num_nibbles && m_path.nibbles[diffindex] == k.nibbles[diffindex];
              diffindex++)
         {}
         return diffindex;
     }
 
+public:
+    StackTrie() = default;
+
     void insert(const Path& k, bytes_view v)
     {
-        switch (nodeType)
+        switch (m_type)
         {
         case NodeType::null:
             *this = leaf(k, v);
@@ -336,7 +345,7 @@ struct StackTrie
 
         case NodeType::branch:
         {
-            assert(key.num_nibbles == 0);
+            assert(m_path.num_nibbles == 0);
             const auto idx = k.nibbles[0];
             auto& child = children[idx];
             if (!child)
@@ -350,15 +359,16 @@ struct StackTrie
         {
             const auto diffidx = getDiffIndex(k);
 
-            if (diffidx == key.num_nibbles)
+            if (diffidx == m_path.num_nibbles)
             {
                 // Go into child.
                 return children[0]->insert(k.tail(diffidx), v);
             }
 
             std::unique_ptr<StackTrie> n;
-            if (diffidx < key.num_nibbles - 1)
-                n = std::make_unique<StackTrie>(ext(key.tail(diffidx + 1), std::move(children[0])));
+            if (diffidx < m_path.num_nibbles - 1)
+                n = std::make_unique<StackTrie>(
+                    ext(m_path.tail(diffidx + 1), std::move(children[0])));
             else
                 n = std::move(children[0]);
 
@@ -366,20 +376,20 @@ struct StackTrie
             if (diffidx == 0)
             {
                 branch = this;
-                branch->nodeType = NodeType::branch;
+                branch->m_type = NodeType::branch;
             }
             else
             {
                 branch = (children[0] = std::make_unique<StackTrie>()).get();
-                branch->nodeType = NodeType::branch;
+                branch->m_type = NodeType::branch;
             }
 
-            const auto origIdx = key.nibbles[diffidx];
+            const auto origIdx = m_path.nibbles[diffidx];
             const auto newIdx = k.nibbles[diffidx];
 
             branch->children[origIdx] = std::move(n);
             branch->children[newIdx] = std::make_unique<StackTrie>(leaf(k.tail(diffidx + 1), v));
-            key = key.head(diffidx);
+            m_path = m_path.head(diffidx);
             break;
         }
 
@@ -391,26 +401,26 @@ struct StackTrie
             StackTrie* branch = nullptr;
             if (diffidx == 0)  // Convert into a branch.
             {
-                nodeType = NodeType::branch;
+                m_type = NodeType::branch;
                 branch = this;
             }
             else
             {
-                nodeType = NodeType::ext;
+                m_type = NodeType::ext;
                 branch = (children[0] = std::make_unique<StackTrie>()).get();
-                branch->nodeType = NodeType::branch;
+                branch->m_type = NodeType::branch;
             }
 
-            const auto origIdx = key.nibbles[diffidx];
+            const auto origIdx = m_path.nibbles[diffidx];
             branch->children[origIdx] =
-                std::make_unique<StackTrie>(leaf(key.tail(diffidx + 1), val));
+                std::make_unique<StackTrie>(leaf(m_path.tail(diffidx + 1), m_value));
 
             const auto newIdx = k.nibbles[diffidx];
             assert(origIdx != newIdx);
             branch->children[newIdx] = std::make_unique<StackTrie>(leaf(k.tail(diffidx + 1), v));
 
-            key = key.head(diffidx);
-            val = {};
+            m_path = m_path.head(diffidx);
+            m_value = {};
             break;
         }
 
@@ -422,19 +432,19 @@ struct StackTrie
     [[nodiscard]] hash256 hash() const
     {
         hash256 r{};
-        switch (nodeType)
+        switch (m_type)
         {
         case NodeType::null:
             return emptyTrieHash;
         case NodeType::leaf:
         {
-            const auto node = rlp::list(key.encode(false), val);
+            const auto node = rlp::list(m_path.encode(false), m_value);
             r = keccak256(node);
             break;
         }
         case NodeType::branch:
         {
-            assert(key.num_nibbles == 0);
+            assert(m_path.num_nibbles == 0);
             BranchNode node;
             for (uint8_t i = 0; i < std::size(children); ++i)
             {
@@ -448,8 +458,8 @@ struct StackTrie
         {
             const auto branch = children[0].get();
             assert(branch != nullptr);
-            assert(branch->nodeType == NodeType::branch);
-            r = keccak256(rlp::list(key.encode(true), branch->hash()));
+            assert(branch->m_type == NodeType::branch);
+            r = keccak256(rlp::list(m_path.encode(true), branch->hash()));
             break;
         }
         default:
