@@ -342,13 +342,14 @@ struct StackTrie
 
         case NodeType::branch:
         {
+            assert(keyOffset == 0);
             assert(key.num_nibbles == 0);
-            const auto idx = k.nibbles[keyOffset];
+            const auto idx = k.nibbles[0];
             auto& child = children[idx];
             if (!child)
-                child = std::make_unique<StackTrie>(leaf(keyOffset + 1, k.tail(keyOffset + 1), v));
+                child = std::make_unique<StackTrie>(leaf(0, k.tail(1), v));
             else
-                child->insert(k, v);
+                child->insert(k.tail(1), v);
             break;
         }
 
@@ -359,12 +360,13 @@ struct StackTrie
             if (diffidx == key.num_nibbles)
             {
                 // Go into child.
-                return children[0]->insert(k, v);
+                return children[0]->insert(k.tail(diffidx), v);
             }
 
             std::unique_ptr<StackTrie> n;
             if (diffidx < key.num_nibbles - 1)
-                n = std::make_unique<StackTrie>(ext(diffidx + 1, key, std::move(children[0])));
+                n = std::make_unique<StackTrie>(
+                    ext(0, key.tail(diffidx + 1), std::move(children[0])));
             else
                 n = std::move(children[0]);
 
@@ -378,21 +380,20 @@ struct StackTrie
             {
                 branch = (children[0] = std::make_unique<StackTrie>()).get();
                 branch->nodeType = NodeType::branch;
-                branch->keyOffset = keyOffset + diffidx;
             }
 
             const auto origIdx = key.nibbles[diffidx];
-            const auto newIdx = k.nibbles[diffidx + keyOffset];
+            const auto newIdx = k.nibbles[diffidx];
 
             branch->children[origIdx] = std::move(n);
-            branch->children[newIdx] = std::make_unique<StackTrie>(
-                leaf(keyOffset + diffidx + 1, k.tail(keyOffset + diffidx + 1), v));
+            branch->children[newIdx] = std::make_unique<StackTrie>(leaf(0, k.tail(diffidx + 1), v));
             key = key.head(diffidx);
             break;
         }
 
         case NodeType::leaf:
         {
+            assert(keyOffset == 0);
             // TODO: Add assert for k == key.
             const auto diffidx = getDiffIndex(k);
 
@@ -407,17 +408,15 @@ struct StackTrie
                 nodeType = NodeType::ext;
                 branch = (children[0] = std::make_unique<StackTrie>()).get();
                 branch->nodeType = NodeType::branch;
-                branch->keyOffset = keyOffset + diffidx;
             }
 
             const auto origIdx = key.nibbles[diffidx];
             branch->children[origIdx] =
-                std::make_unique<StackTrie>(leaf(diffidx + 1, key.tail(diffidx + 1), val));
+                std::make_unique<StackTrie>(leaf(0, key.tail(diffidx + 1), val));
 
-            const auto newIdx = k.nibbles[diffidx + keyOffset];
+            const auto newIdx = k.nibbles[diffidx];
             assert(origIdx != newIdx);
-            branch->children[newIdx] = std::make_unique<StackTrie>(
-                leaf(branch->keyOffset + 1, k.tail(branch->keyOffset + 1), v));
+            branch->children[newIdx] = std::make_unique<StackTrie>(leaf(0, k.tail(diffidx + 1), v));
 
             key = key.head(diffidx);
             val = {};
