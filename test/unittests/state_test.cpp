@@ -323,13 +323,13 @@ class StackTrie
         return node;
     }
 
-    size_t getDiffIndex(const Path& k) const
+    static size_t diff_index(const Path& p1, const Path& p2) noexcept
     {
-        size_t diffindex = 0;
-        for (; diffindex < m_path.num_nibbles && m_path.nibbles[diffindex] == k.nibbles[diffindex];
-             diffindex++)
-        {}
-        return diffindex;
+        assert(p1.num_nibbles <= p2.num_nibbles);
+        size_t d = 0;
+        while (d < p1.num_nibbles && p1.nibbles[d] == p2.nibbles[d])
+            ++d;
+        return d;
     }
 
 public:
@@ -357,7 +357,7 @@ public:
 
         case NodeType::ext:
         {
-            const auto diffidx = getDiffIndex(k);
+            const auto diffidx = diff_index(m_path, k);
 
             if (diffidx == m_path.num_nibbles)
             {
@@ -396,7 +396,7 @@ public:
         case NodeType::leaf:
         {
             // TODO: Add assert for k == key.
-            const auto diffidx = getDiffIndex(k);
+            const auto diffidx = diff_index(m_path, k);
 
             StackTrie* branch = nullptr;
             if (diffidx == 0)  // Convert into a branch.
