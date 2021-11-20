@@ -241,21 +241,6 @@ struct BranchNode
     [[nodiscard]] hash256 hash() const { return keccak256(rlp()); }
 };
 
-using State = std::map<address, Account>;
-bytes build_leaf_node(const address& addr, const Account& account)
-{
-    const auto path = keccak256(addr);
-    const auto encoded_path = bytes{0x20} + bytes{path.bytes, sizeof(path)};
-    const auto value = rlp::encode(account);  // Double RLP encoding.
-    return rlp::list(encoded_path, value);
-}
-
-bytes build_leaf_node(const hash256& key, bytes_view value)
-{
-    const auto encoded_path = bytes{0x20} + bytes{key.bytes, sizeof(key)};
-    return rlp::list(encoded_path, value);
-}
-
 /// Insert-only Trie implementation for getting the root hash out of (key, value) pairs.
 /// Based on StackTrie from go-ethereum.
 class Trie
@@ -484,18 +469,6 @@ TEST(state, hashed_address)
     EXPECT_EQ(hex(hashed_addr), "d52688a8f926c816ca1e079067caba944f158e764817b83fc43594370ca9cf62");
 }
 
-TEST(state, build_leaf_node)
-{
-    State state;
-    const auto addr = 0x0000000000000000000000000000000000000002_address;
-    state[addr].set_balance(1);
-    const auto node = build_leaf_node(addr, state[addr]);
-    EXPECT_EQ(hex(node),
-        "f86aa120d52688a8f926c816ca1e079067caba944f158e764817b83fc43594370ca9cf62b846f8448001a056e8"
-        "1f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421a0c5d2460186f7233c927e7db2dcc7"
-        "03c0e500b653ca82273b7bfad8045d85a470");
-}
-
 TEST(state, single_account_v1)
 {
     // Expected value computed in go-ethereum.
@@ -517,11 +490,6 @@ TEST(state, storage_trie_v1)
     const auto value = 0x00000000000000000000000000000000000000000000000000000000000001ff_bytes32;
     const auto xkey = keccak256(key);
     const auto xvalue = rlp::string(rlp::trim(value));
-    const auto node = build_leaf_node(xkey, xvalue);
-    EXPECT_EQ(hex(node),
-        "e6a120290decd9548b62a8d60345a988386fc84ba6bc95484008f6362f93160ef3e563838201ff");
-    const auto root = keccak256(node);
-    EXPECT_EQ(hex(root), "d9aa83255221f68fdd4931f73f8fe6ea30c191a9619b5fc60ce2914eee1e7e54");
 
     Trie st;
     st.insert(xkey, xvalue);
