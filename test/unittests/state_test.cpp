@@ -744,19 +744,38 @@ TEST(state, trie_3keys_topologies)
 
     for (const auto& test : tests)
     {
-        Trie st;
-        for (const auto& kv : test)
+        // Insert in order and check hash at every step.
         {
-            const auto k = from_hex(kv.key_hex);
-            const auto v = to_bytes(kv.value);
-            st.insert(Path{k}, v);
-            EXPECT_EQ(hex(st.hash()), kv.hash_hex);
+            Trie st;
+            for (const auto& kv : test)
+            {
+                const auto k = from_hex(kv.key_hex);
+                const auto v = to_bytes(kv.value);
+                st.insert(Path{k}, v);
+                EXPECT_EQ(hex(st.hash()), kv.hash_hex);
+            }
+        }
+
+        // Check if all insert order permutations give the same final hash.
+        size_t order[] = {0, 1, 2};
+        while (std::next_permutation(std::begin(order), std::end(order)))
+        {
+            Trie trie;
+            for (size_t i = 0; i < std::size(test); ++i)
+            {
+                const auto k = from_hex(test[order[i]].key_hex);
+                const auto v = to_bytes(test[order[i]].value);
+                trie.insert(Path{k}, v);
+            }
+            EXPECT_EQ(hex(trie.hash()), test[2].hash_hex);
         }
     }
 }
 
 TEST(state, trie_4keys_extended_node_split)
 {
+    // TODO: Move the test cases to trie_3keys_topologies by using std::span or
+    //       std::initializer_list.
     struct KVH
     {
         const char* key_hex;
