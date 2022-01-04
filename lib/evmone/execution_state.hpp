@@ -181,7 +181,6 @@ public:
 struct ExecutionState
 {
     int64_t gas_left = 0;
-    alignas(sizeof(intx::uint256)) intx::uint256 stack_space[StackCtrl::limit];
     Memory memory;
     const evmc_message* msg = nullptr;
     evmc::HostContext host;
@@ -203,6 +202,8 @@ struct ExecutionState
         const baseline::CodeAnalysis* baseline = nullptr;
         const AdvancedCodeAnalysis* advanced;
     } analysis{};
+
+    alignas(sizeof(intx::uint256)) intx::uint256 stack_space[StackCtrl::limit];
 
     ExecutionState() noexcept = default;
 

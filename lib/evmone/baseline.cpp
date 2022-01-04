@@ -91,6 +91,7 @@ inline evmc_status_code check_requirements(
 /// Implementation of a generic instruction "case".
 #define DISPATCH_CASE(OPCODE)                                                      \
     case OPCODE:                                                                   \
+        asm("#" #OPCODE);                                                          \
         if (code_it = invoke<OPCODE>(cost_table, stack, state, code_it); !code_it) \
             goto exit;                                                             \
         break
