@@ -11,34 +11,38 @@ namespace evmone
 namespace
 {
 /// Wraps the generic instruction implementation to advanced instruction function signature.
-template <void instr_fn(ExecutionState&)>
-const instruction* op(const instruction* instr, AdvancedExecutionState& state) noexcept
+template <void instr_fn(StackCtrl&, ExecutionState&)>
+const instruction* op(
+    const instruction* instr, StackCtrl& stack, AdvancedExecutionState& state) noexcept
 {
-    instr_fn(state);
+    instr_fn(stack, state);
     return ++instr;
 }
 
 /// Wraps the generic instruction implementation to advanced instruction function signature.
-template <evmc_status_code instr_fn(ExecutionState&)>
-const instruction* op(const instruction* instr, AdvancedExecutionState& state) noexcept
+template <evmc_status_code instr_fn(StackCtrl&, ExecutionState&)>
+const instruction* op(
+    const instruction* instr, StackCtrl& stack, AdvancedExecutionState& state) noexcept
 {
-    const auto status_code = instr_fn(state);
+    const auto status_code = instr_fn(stack, state);
     if (status_code != EVMC_SUCCESS)
         return state.exit(status_code);
     return ++instr;
 }
 
-const instruction* op_stop(const instruction*, AdvancedExecutionState& state) noexcept
+const instruction* op_stop(
+    const instruction*, StackCtrl& /*stack*/, AdvancedExecutionState& state) noexcept
 {
     return state.exit(EVMC_SUCCESS);
 }
 
-const instruction* op_sstore(const instruction* instr, AdvancedExecutionState& state) noexcept
+const instruction* op_sstore(
+    const instruction* instr, StackCtrl& stack, AdvancedExecutionState& state) noexcept
 {
     const auto gas_left_correction = state.current_block_cost - instr->arg.number;
     state.gas_left += gas_left_correction;
 
-    const auto status = sstore(state);
+    const auto status = sstore(stack, state);
     if (status != EVMC_SUCCESS)
         return state.exit(status);
 
@@ -48,9 +52,10 @@ const instruction* op_sstore(const instruction* instr, AdvancedExecutionState& s
     return ++instr;
 }
 
-const instruction* op_jump(const instruction*, AdvancedExecutionState& state) noexcept
+const instruction* op_jump(
+    const instruction*, StackCtrl& stack, AdvancedExecutionState& state) noexcept
 {
-    const auto dst = state.stack.pop();
+    const auto dst = stack.pop();
     auto pc = -1;
     if (std::numeric_limits<int>::max() < dst ||
         (pc = find_jumpdest(*state.analysis.advanced, static_cast<int>(dst))) < 0)
@@ -59,59 +64,66 @@ const instruction* op_jump(const instruction*, AdvancedExecutionState& state) no
     return &state.analysis.advanced->instrs[static_cast<size_t>(pc)];
 }
 
-const instruction* op_jumpi(const instruction* instr, AdvancedExecutionState& state) noexcept
+const instruction* op_jumpi(
+    const instruction* instr, StackCtrl& stack, AdvancedExecutionState& state) noexcept
 {
-    if (state.stack[1] != 0)
-        instr = op_jump(instr, state);
+    if (stack[1] != 0)
+        instr = op_jump(instr, stack, state);
     else
     {
-        state.stack.pop();
+        stack.pop();
         ++instr;
     }
 
     // OPT: The pc must be the BEGINBLOCK (even in fallback case),
     //      so we can execute it straight away.
 
-    state.stack.pop();
+    stack.pop();
     return instr;
 }
 
-const instruction* op_pc(const instruction* instr, AdvancedExecutionState& state) noexcept
+const instruction* op_pc(
+    const instruction* instr, StackCtrl& stack, AdvancedExecutionState& /*state*/) noexcept
 {
-    state.stack.push(instr->arg.number);
+    stack.push(instr->arg.number);
     return ++instr;
 }
 
-const instruction* op_gas(const instruction* instr, AdvancedExecutionState& state) noexcept
+const instruction* op_gas(
+    const instruction* instr, StackCtrl& stack, AdvancedExecutionState& state) noexcept
 {
     const auto correction = state.current_block_cost - instr->arg.number;
     const auto gas = static_cast<uint64_t>(state.gas_left + correction);
-    state.stack.push(gas);
+    stack.push(gas);
     return ++instr;
 }
 
-const instruction* op_push_small(const instruction* instr, AdvancedExecutionState& state) noexcept
+const instruction* op_push_small(
+    const instruction* instr, StackCtrl& stack, AdvancedExecutionState& /*state*/) noexcept
 {
-    state.stack.push(instr->arg.small_push_value);
+    stack.push(instr->arg.small_push_value);
     return ++instr;
 }
 
-const instruction* op_push_full(const instruction* instr, AdvancedExecutionState& state) noexcept
+const instruction* op_push_full(
+    const instruction* instr, StackCtrl& stack, AdvancedExecutionState& /*state*/) noexcept
 {
-    state.stack.push(*instr->arg.push_value);
+    stack.push(*instr->arg.push_value);
     return ++instr;
 }
 
-const instruction* op_invalid(const instruction*, AdvancedExecutionState& state) noexcept
+const instruction* op_invalid(
+    const instruction*, StackCtrl& /*stack*/, AdvancedExecutionState& state) noexcept
 {
     return state.exit(EVMC_INVALID_INSTRUCTION);
 }
 
 template <evmc_status_code status_code>
-const instruction* op_return(const instruction*, AdvancedExecutionState& state) noexcept
+const instruction* op_return(
+    const instruction*, StackCtrl& stack, AdvancedExecutionState& state) noexcept
 {
-    const auto offset = state.stack[0];
-    const auto size = state.stack[1];
+    const auto offset = stack[0];
+    const auto size = stack[1];
 
     if (!check_memory(state, offset, size))
         return state.exit(EVMC_OUT_OF_GAS);
@@ -123,12 +135,13 @@ const instruction* op_return(const instruction*, AdvancedExecutionState& state) 
 }
 
 template <evmc_call_kind Kind, bool Static = false>
-const instruction* op_call(const instruction* instr, AdvancedExecutionState& state) noexcept
+const instruction* op_call(
+    const instruction* instr, StackCtrl& stack, AdvancedExecutionState& state) noexcept
 {
     const auto gas_left_correction = state.current_block_cost - instr->arg.number;
     state.gas_left += gas_left_correction;
 
-    const auto status = call<Kind, Static>(state);
+    const auto status = call<Kind, Static>(stack, state);
     if (status != EVMC_SUCCESS)
         return state.exit(status);
 
@@ -139,12 +152,13 @@ const instruction* op_call(const instruction* instr, AdvancedExecutionState& sta
 }
 
 template <evmc_call_kind Kind>
-const instruction* op_create(const instruction* instr, AdvancedExecutionState& state) noexcept
+const instruction* op_create(
+    const instruction* instr, StackCtrl& stack, AdvancedExecutionState& state) noexcept
 {
     const auto gas_left_correction = state.current_block_cost - instr->arg.number;
     state.gas_left += gas_left_correction;
 
-    const auto status = create<Kind>(state);
+    const auto status = create<Kind>(stack, state);
     if (status != EVMC_SUCCESS)
         return state.exit(status);
 
@@ -154,27 +168,30 @@ const instruction* op_create(const instruction* instr, AdvancedExecutionState& s
     return ++instr;
 }
 
-const instruction* op_undefined(const instruction*, AdvancedExecutionState& state) noexcept
+const instruction* op_undefined(
+    const instruction*, StackCtrl& /*stack*/, AdvancedExecutionState& state) noexcept
 {
     return state.exit(EVMC_UNDEFINED_INSTRUCTION);
 }
 
-const instruction* op_selfdestruct(const instruction*, AdvancedExecutionState& state) noexcept
+const instruction* op_selfdestruct(
+    const instruction*, StackCtrl& stack, AdvancedExecutionState& state) noexcept
 {
-    return state.exit(selfdestruct(state).status);
+    return state.exit(selfdestruct(stack, state).status);
 }
 
-const instruction* opx_beginblock(const instruction* instr, AdvancedExecutionState& state) noexcept
+const instruction* opx_beginblock(
+    const instruction* instr, StackCtrl& stack, AdvancedExecutionState& state) noexcept
 {
     auto& block = instr->arg.block;
 
     if ((state.gas_left -= block.gas_cost) < 0)
         return state.exit(EVMC_OUT_OF_GAS);
 
-    if (static_cast<int>(state.stack.size()) < block.stack_req)
+    if (static_cast<int>(stack.size()) < block.stack_req)
         return state.exit(EVMC_STACK_UNDERFLOW);
 
-    if (static_cast<int>(state.stack.size()) + block.stack_max_growth > Stack::limit)
+    if (static_cast<int>(stack.size()) + block.stack_max_growth > Stack::limit)
         return state.exit(EVMC_STACK_OVERFLOW);
 
     state.current_block_cost = block.gas_cost;

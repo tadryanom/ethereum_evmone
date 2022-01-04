@@ -13,8 +13,9 @@ evmc_result execute(AdvancedExecutionState& state, const AdvancedCodeAnalysis& a
     state.analysis.advanced = &analysis;  // Allow accessing the analysis by instructions.
 
     const auto* instr = &state.analysis.advanced->instrs[0];  // Start with the first instruction.
+    StackCtrl stack{state.stack.storage};
     while (instr != nullptr)
-        instr = instr->fn(instr, state);
+        instr = instr->fn(instr, stack, state);
 
     const auto gas_left =
         (state.status == EVMC_SUCCESS || state.status == EVMC_REVERT) ? state.gas_left : 0;

@@ -49,7 +49,7 @@ namespace
 {
 template <evmc_opcode Op>
 inline evmc_status_code check_requirements(
-    const CostTable& cost_table, ExecutionState& state) noexcept
+    const CostTable& cost_table, const StackCtrl& stack, ExecutionState& state) noexcept
 {
     static_assert(
         !(instr::has_const_gas_cost(Op) && instr::gas_costs[EVMC_FRONTIER][Op] == instr::undefined),
@@ -68,7 +68,7 @@ inline evmc_status_code check_requirements(
 
     // Check stack requirements first. This is order is not required,
     // but it is nicer because complete gas check may need to inspect operands.
-    const auto stack_size = state.stack.size();
+    const auto stack_size = stack.size();
     if constexpr (instr::traits[Op].stack_height_change > 0)
     {
         static_assert(instr::traits[Op].stack_height_change == 1);
@@ -89,26 +89,26 @@ inline evmc_status_code check_requirements(
 
 
 /// Implementation of a generic instruction "case".
-#define DISPATCH_CASE(OPCODE)                                               \
-    case OPCODE:                                                            \
-        if (code_it = invoke<OPCODE>(cost_table, state, code_it); !code_it) \
-            goto exit;                                                      \
+#define DISPATCH_CASE(OPCODE)                                                      \
+    case OPCODE:                                                                   \
+        if (code_it = invoke<OPCODE>(cost_table, stack, state, code_it); !code_it) \
+            goto exit;                                                             \
         break
 
 /// The signature of basic instructions which always succeed, e.g. ADD.
-using SucceedingInstrFn = void(ExecutionState&) noexcept;
+using SucceedingInstrFn = void(StackCtrl&, ExecutionState&) noexcept;
 static_assert(std::is_same_v<decltype(add), SucceedingInstrFn>);
 
 /// The signature of basic instructions which may fail.
-using MayFailInstrFn = evmc_status_code(ExecutionState&) noexcept;
+using MayFailInstrFn = evmc_status_code(StackCtrl&, ExecutionState&) noexcept;
 static_assert(std::is_same_v<decltype(exp), MayFailInstrFn>);
 
 /// The signature of terminating instructions.
-using TerminatingInstrFn = StopToken(ExecutionState&) noexcept;
+using TerminatingInstrFn = StopToken(StackCtrl&, ExecutionState&) noexcept;
 static_assert(std::is_same_v<decltype(stop), TerminatingInstrFn>);
 
 /// The signature of instructions requiring access to current code position.
-using CodePositionInstrFn = code_iterator(ExecutionState&, code_iterator) noexcept;
+using CodePositionInstrFn = code_iterator(StackCtrl&, ExecutionState&, code_iterator) noexcept;
 static_assert(std::is_same_v<decltype(push<1>), CodePositionInstrFn>);
 static_assert(std::is_same_v<decltype(pc), CodePositionInstrFn>);
 static_assert(std::is_same_v<decltype(jump), CodePositionInstrFn>);
@@ -116,21 +116,22 @@ static_assert(std::is_same_v<decltype(jump), CodePositionInstrFn>);
 /// A helper to invoke instruction implementations of different signatures
 /// done by template specialization.
 template <typename InstrFn>
-code_iterator invoke(InstrFn instr_fn, ExecutionState& state, code_iterator pos) noexcept = delete;
+code_iterator invoke(
+    InstrFn instr_fn, StackCtrl& stack, ExecutionState& state, code_iterator pos) noexcept = delete;
 
 template <>
-[[gnu::always_inline]] inline code_iterator invoke<SucceedingInstrFn*>(
-    SucceedingInstrFn* instr_fn, ExecutionState& state, code_iterator pos) noexcept
+[[gnu::always_inline]] inline code_iterator invoke<SucceedingInstrFn*>(SucceedingInstrFn* instr_fn,
+    StackCtrl& stack, ExecutionState& state, code_iterator pos) noexcept
 {
-    instr_fn(state);
+    instr_fn(stack, state);
     return pos + 1;
 }
 
 template <>
 [[gnu::always_inline]] inline code_iterator invoke<MayFailInstrFn*>(
-    MayFailInstrFn* instr_fn, ExecutionState& state, code_iterator pos) noexcept
+    MayFailInstrFn* instr_fn, StackCtrl& stack, ExecutionState& state, code_iterator pos) noexcept
 {
-    if (const auto status = instr_fn(state); status != EVMC_SUCCESS)
+    if (const auto status = instr_fn(stack, state); status != EVMC_SUCCESS)
     {
         state.status = status;
         return nullptr;
@@ -140,30 +141,33 @@ template <>
 
 template <>
 [[gnu::always_inline]] inline code_iterator invoke<TerminatingInstrFn*>(
-    TerminatingInstrFn* instr_fn, ExecutionState& state, code_iterator /*pos*/) noexcept
+    TerminatingInstrFn* instr_fn, StackCtrl& stack, ExecutionState& state,
+    code_iterator /*pos*/) noexcept
 {
-    state.status = instr_fn(state).status;
+    state.status = instr_fn(stack, state).status;
     return nullptr;
 }
 
 template <>
 [[gnu::always_inline]] inline code_iterator invoke<CodePositionInstrFn*>(
-    CodePositionInstrFn* instr_fn, ExecutionState& state, code_iterator pos) noexcept
+    CodePositionInstrFn* instr_fn, StackCtrl& stack, ExecutionState& state,
+    code_iterator pos) noexcept
 {
-    return instr_fn(state, pos);
+    return instr_fn(stack, state, pos);
 }
 
 /// A helper to invoke the instruction implementation of the given opcode Op.
 template <evmc_opcode Op>
-[[gnu::always_inline]] inline code_iterator invoke(
-    const CostTable& cost_table, ExecutionState& state, code_iterator pos) noexcept
+[[gnu::always_inline]] inline code_iterator invoke(const CostTable& cost_table, StackCtrl& stack,
+    ExecutionState& state, code_iterator pos) noexcept
 {
-    if (const auto status = check_requirements<Op>(cost_table, state); status != EVMC_SUCCESS)
+    if (const auto status = check_requirements<Op>(cost_table, stack, state);
+        status != EVMC_SUCCESS)
     {
         state.status = status;
         return nullptr;
     }
-    return invoke(instr::impl<Op>, state, pos);
+    return invoke(instr::impl<Op>, stack, state, pos);
 }
 
 template <bool TracingEnabled>
@@ -179,6 +183,8 @@ evmc_result execute(const VM& vm, ExecutionState& state, const CodeAnalysis& ana
         tracer->notify_execution_start(state.rev, *state.msg, state.code);
 
     const auto& cost_table = get_baseline_cost_table(state.rev);
+
+    StackCtrl stack{state.stack.storage};
 
     const auto* const code = state.code.data();
     auto code_it = code;  // Code iterator for the interpreter loop.

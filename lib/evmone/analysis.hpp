@@ -81,7 +81,8 @@ static_assert(
     sizeof(instruction_argument) == sizeof(uint64_t), "Incorrect size of instruction_argument");
 
 /// The pointer to function implementing an instruction execution.
-using instruction_exec_fn = const instruction* (*)(const instruction*, AdvancedExecutionState&);
+using instruction_exec_fn = const instruction* (*)(const instruction*, StackCtrl&,
+    AdvancedExecutionState&);
 
 /// The evmone intrinsic opcodes.
 ///

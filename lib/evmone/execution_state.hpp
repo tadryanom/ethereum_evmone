@@ -21,6 +21,41 @@ using bytes = std::basic_string<uint8_t>;
 using bytes_view = std::basic_string_view<uint8_t>;
 
 
+struct StackCtrl
+{
+    static constexpr auto limit = 1024;
+
+    intx::uint256* top_item;
+
+    intx::uint256* storage;
+
+    StackCtrl(intx::uint256* stack_space) noexcept : storage{stack_space} { clear(); }
+
+    [[nodiscard]] int size() const noexcept { return static_cast<int>(top_item + 1 - storage); }
+
+    [[nodiscard]] intx::uint256& top() noexcept { return *top_item; }
+
+    /// Returns the reference to the stack item on given position from the stack top.
+    [[nodiscard]] intx::uint256& operator[](int index) noexcept { return *(top_item - index); }
+
+    /// Returns the const reference to the stack item on given position from the stack top.
+    [[nodiscard]] const intx::uint256& operator[](int index) const noexcept
+    {
+        return *(top_item - index);
+    }
+
+    /// Pushes an item on the stack. The stack limit is not checked.
+    void push(const intx::uint256& item) noexcept { *++top_item = item; }
+
+    /// Returns an item popped from the top of the stack.
+    intx::uint256 pop() noexcept { return *top_item--; }
+
+    /// Clears the stack by resetting its size to 0 (sets the top_item pointer to below the stack
+    /// bottom).
+    [[clang::no_sanitize("bounds")]] void clear() noexcept { top_item = storage - 1; }
+};
+
+
 /// The stack for 256-bit EVM words.
 ///
 /// This implementation reserves memory inplace for all possible stack items (1024),
