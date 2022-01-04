@@ -60,7 +60,7 @@ struct StackCtrl
 ///
 /// This implementation reserves memory inplace for all possible stack items (1024),
 /// so this type is big. Make sure it is allocated on heap.
-struct Stack
+struct DeprecatedStack
 {
     /// The maximum number of stack items.
     static constexpr auto limit = 1024;
@@ -74,7 +74,7 @@ struct Stack
     alignas(sizeof(intx::uint256)) intx::uint256 storage[limit];
 
     /// Default constructor. Sets the top_item pointer to below the stack bottom.
-    Stack() noexcept { clear(); }
+    DeprecatedStack() noexcept { clear(); }
 
     /// The current number of items on the stack.
     [[nodiscard]] int size() const noexcept { return static_cast<int>(top_item + 1 - storage); }
@@ -181,7 +181,7 @@ public:
 struct ExecutionState
 {
     int64_t gas_left = 0;
-    Stack stack;
+    alignas(sizeof(intx::uint256)) intx::uint256 stack_space[StackCtrl::limit];
     Memory memory;
     const evmc_message* msg = nullptr;
     evmc::HostContext host;
@@ -222,7 +222,6 @@ struct ExecutionState
         const uint8_t* code_ptr, size_t code_size) noexcept
     {
         gas_left = message.gas;
-        stack.clear();
         memory.clear();
         msg = &message;
         host = {host_interface, host_ctx};

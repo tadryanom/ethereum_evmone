@@ -82,7 +82,7 @@ class InstructionTracer : public Tracer
     const char* const* m_opcode_names = nullptr;
     std::ostream& m_out;  ///< Output stream.
 
-    void output_stack(const Stack& stack)
+    void output_stack(const StackCtrl& stack)
     {
         const auto top = stack.size() - 1;
         m_out << R"(,"stack":[)";
@@ -119,7 +119,7 @@ class InstructionTracer : public Tracer
         m_out << R"(,"op":)" << int{opcode};
         m_out << R"(,"opName":")" << get_name(m_opcode_names, opcode) << '"';
         m_out << R"(,"gas":)" << state.gas_left;
-        output_stack(state.stack);
+        // output_stack(state.stack);
 
         // Full memory can be dumped as evmc::hex({state.memory.data(), state.memory.size()}),
         // but this should not be done by default. Adding --tracing=+memory option would be nice.

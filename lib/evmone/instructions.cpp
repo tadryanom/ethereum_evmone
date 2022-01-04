@@ -191,7 +191,7 @@ const instruction* opx_beginblock(
     if (static_cast<int>(stack.size()) < block.stack_req)
         return state.exit(EVMC_STACK_UNDERFLOW);
 
-    if (static_cast<int>(stack.size()) + block.stack_max_growth > Stack::limit)
+    if (static_cast<int>(stack.size()) + block.stack_max_growth > StackCtrl::limit)
         return state.exit(EVMC_STACK_OVERFLOW);
 
     state.current_block_cost = block.gas_cost;
