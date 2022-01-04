@@ -27,11 +27,11 @@ struct StackCtrl
 
     intx::uint256* top_item;
 
-    intx::uint256* storage;
+    int size_ = 0;
 
-    StackCtrl(intx::uint256* stack_space) noexcept : storage{stack_space} { clear(); }
+    StackCtrl(intx::uint256* stack_space) noexcept : top_item{stack_space - 1} {}
 
-    [[nodiscard]] int size() const noexcept { return static_cast<int>(top_item + 1 - storage); }
+    [[nodiscard]] int size() const noexcept { return size_; }
 
     [[nodiscard]] intx::uint256& top() noexcept { return *top_item; }
 
@@ -45,14 +45,18 @@ struct StackCtrl
     }
 
     /// Pushes an item on the stack. The stack limit is not checked.
-    void push(const intx::uint256& item) noexcept { *++top_item = item; }
+    void push(const intx::uint256& item) noexcept
+    {
+        ++size_;
+        *++top_item = item;
+    }
 
     /// Returns an item popped from the top of the stack.
-    intx::uint256 pop() noexcept { return *top_item--; }
-
-    /// Clears the stack by resetting its size to 0 (sets the top_item pointer to below the stack
-    /// bottom).
-    [[clang::no_sanitize("bounds")]] void clear() noexcept { top_item = storage - 1; }
+    intx::uint256 pop() noexcept
+    {
+        --size_;
+        return *top_item--;
+    }
 };
 
 
