@@ -86,7 +86,7 @@ class InstructionTracer : public Tracer
     {
         const auto top = stack.size() - 1;
         m_out << R"(,"stack":[)";
-        for (int i = top; i >= 0; --i)
+        for (long i = top; i >= 0; --i)
         {
             if (i != top)
                 m_out << ',';

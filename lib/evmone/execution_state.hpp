@@ -27,22 +27,22 @@ struct StackCtrl
 
     intx::uint256* stack_space_;
 
-    int top_index_ = -1;
+    long top_index_ = -1;
 
     StackCtrl(intx::uint256* stack_space) noexcept : stack_space_{stack_space} {}
 
-    [[nodiscard]] int size() const noexcept { return top_index_ + 1; }
+    [[nodiscard]] long size() const noexcept { return top_index_ + 1; }
 
     [[nodiscard]] intx::uint256& top() noexcept { return stack_space_[top_index_]; }
 
     /// Returns the reference to the stack item on given position from the stack top.
-    [[nodiscard]] intx::uint256& operator[](int index) noexcept
+    [[nodiscard]] intx::uint256& operator[](long index) noexcept
     {
         return stack_space_[top_index_ - index];
     }
 
     /// Returns the const reference to the stack item on given position from the stack top.
-    [[nodiscard]] const intx::uint256& operator[](int index) const noexcept
+    [[nodiscard]] const intx::uint256& operator[](long index) const noexcept
     {
         return stack_space_[top_index_ - index];
     }
