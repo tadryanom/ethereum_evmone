@@ -7,7 +7,7 @@
 namespace evmone
 {
 template <evmc_call_kind Kind, bool Static>
-evmc_status_code call(StackCtrl& stack, ExecutionState& state) noexcept
+evmc_status_code call(StackCtrl stack, ExecutionState& state) noexcept
 {
     const auto gas = stack.pop();
     const auto dst = intx::be::trunc<evmc::address>(stack.pop());
@@ -97,14 +97,14 @@ evmc_status_code call(StackCtrl& stack, ExecutionState& state) noexcept
     return EVMC_SUCCESS;
 }
 
-template evmc_status_code call<EVMC_CALL>(StackCtrl&, ExecutionState& state) noexcept;
-template evmc_status_code call<EVMC_CALL, true>(StackCtrl&, ExecutionState& state) noexcept;
-template evmc_status_code call<EVMC_DELEGATECALL>(StackCtrl&, ExecutionState& state) noexcept;
-template evmc_status_code call<EVMC_CALLCODE>(StackCtrl&, ExecutionState& state) noexcept;
+template evmc_status_code call<EVMC_CALL>(StackCtrl, ExecutionState& state) noexcept;
+template evmc_status_code call<EVMC_CALL, true>(StackCtrl, ExecutionState& state) noexcept;
+template evmc_status_code call<EVMC_DELEGATECALL>(StackCtrl, ExecutionState& state) noexcept;
+template evmc_status_code call<EVMC_CALLCODE>(StackCtrl, ExecutionState& state) noexcept;
 
 
 template <evmc_call_kind Kind>
-evmc_status_code create(StackCtrl& stack, ExecutionState& state) noexcept
+evmc_status_code create(StackCtrl stack, ExecutionState& state) noexcept
 {
     if (state.msg->flags & EVMC_STATIC)
         return EVMC_STATIC_MODE_VIOLATION;
@@ -161,6 +161,6 @@ evmc_status_code create(StackCtrl& stack, ExecutionState& state) noexcept
     return EVMC_SUCCESS;
 }
 
-template evmc_status_code create<EVMC_CREATE>(StackCtrl&, ExecutionState& state) noexcept;
-template evmc_status_code create<EVMC_CREATE2>(StackCtrl&, ExecutionState& state) noexcept;
+template evmc_status_code create<EVMC_CREATE>(StackCtrl, ExecutionState& state) noexcept;
+template evmc_status_code create<EVMC_CREATE2>(StackCtrl, ExecutionState& state) noexcept;
 }  // namespace evmone

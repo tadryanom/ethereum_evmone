@@ -96,19 +96,19 @@ inline evmc_status_code check_requirements(
         break
 
 /// The signature of basic instructions which always succeed, e.g. ADD.
-using SucceedingInstrFn = void(StackCtrl&, ExecutionState&) noexcept;
+using SucceedingInstrFn = void(StackCtrl, ExecutionState&) noexcept;
 static_assert(std::is_same_v<decltype(add), SucceedingInstrFn>);
 
 /// The signature of basic instructions which may fail.
-using MayFailInstrFn = evmc_status_code(StackCtrl&, ExecutionState&) noexcept;
+using MayFailInstrFn = evmc_status_code(StackCtrl, ExecutionState&) noexcept;
 static_assert(std::is_same_v<decltype(exp), MayFailInstrFn>);
 
 /// The signature of terminating instructions.
-using TerminatingInstrFn = StopToken(StackCtrl&, ExecutionState&) noexcept;
+using TerminatingInstrFn = StopToken(StackCtrl, ExecutionState&) noexcept;
 static_assert(std::is_same_v<decltype(stop), TerminatingInstrFn>);
 
 /// The signature of instructions requiring access to current code position.
-using CodePositionInstrFn = code_iterator(StackCtrl&, ExecutionState&, code_iterator) noexcept;
+using CodePositionInstrFn = code_iterator(StackCtrl, ExecutionState&, code_iterator) noexcept;
 static_assert(std::is_same_v<decltype(push<1>), CodePositionInstrFn>);
 static_assert(std::is_same_v<decltype(pc), CodePositionInstrFn>);
 static_assert(std::is_same_v<decltype(jump), CodePositionInstrFn>);
@@ -167,7 +167,9 @@ template <evmc_opcode Op>
         state.status = status;
         return nullptr;
     }
-    return invoke(instr::impl<Op>, stack, state, pos);
+    const auto ret = invoke(instr::impl<Op>, stack, state, pos);
+    stack.top_index_ += instr::traits[Op].stack_height_change;
+    return ret;
 }
 
 template <bool TracingEnabled>

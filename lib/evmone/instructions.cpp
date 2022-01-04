@@ -11,7 +11,7 @@ namespace evmone
 namespace
 {
 /// Wraps the generic instruction implementation to advanced instruction function signature.
-template <void instr_fn(StackCtrl&, ExecutionState&)>
+template <void instr_fn(StackCtrl, ExecutionState&)>
 const instruction* op(
     const instruction* instr, StackCtrl& stack, AdvancedExecutionState& state) noexcept
 {
@@ -20,7 +20,7 @@ const instruction* op(
 }
 
 /// Wraps the generic instruction implementation to advanced instruction function signature.
-template <evmc_status_code instr_fn(StackCtrl&, ExecutionState&)>
+template <evmc_status_code instr_fn(StackCtrl, ExecutionState&)>
 const instruction* op(
     const instruction* instr, StackCtrl& stack, AdvancedExecutionState& state) noexcept
 {
