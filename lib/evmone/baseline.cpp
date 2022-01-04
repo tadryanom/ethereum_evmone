@@ -49,7 +49,7 @@ namespace
 {
 template <evmc_opcode Op>
 inline evmc_status_code check_requirements(
-    const CostTable& cost_table, const StackCtrl& stack, ExecutionState& state) noexcept
+    const CostTable& cost_table, long stack_size, ExecutionState& state) noexcept
 {
     static_assert(
         !(instr::has_const_gas_cost(Op) && instr::gas_costs[EVMC_FRONTIER][Op] == instr::undefined),
@@ -68,7 +68,6 @@ inline evmc_status_code check_requirements(
 
     // Check stack requirements first. This is order is not required,
     // but it is nicer because complete gas check may need to inspect operands.
-    const auto stack_size = stack.size();
     if constexpr (instr::traits[Op].stack_height_change > 0)
     {
         static_assert(instr::traits[Op].stack_height_change == 1);
@@ -162,7 +161,7 @@ template <evmc_opcode Op>
 [[gnu::always_inline]] inline code_iterator invoke(const CostTable& cost_table, StackCtrl& stack,
     ExecutionState& state, code_iterator pos) noexcept
 {
-    if (const auto status = check_requirements<Op>(cost_table, stack, state);
+    if (const auto status = check_requirements<Op>(cost_table, stack.size(), state);
         status != EVMC_SUCCESS)
     {
         state.status = status;
