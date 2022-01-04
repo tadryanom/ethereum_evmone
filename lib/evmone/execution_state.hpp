@@ -25,38 +25,33 @@ struct StackCtrl
 {
     static constexpr auto limit = 1024;
 
-    intx::uint256* top_item;
+    intx::uint256* stack_space_;
 
-    int size_ = 0;
+    int top_index_ = -1;
 
-    StackCtrl(intx::uint256* stack_space) noexcept : top_item{stack_space - 1} {}
+    StackCtrl(intx::uint256* stack_space) noexcept : stack_space_{stack_space} {}
 
-    [[nodiscard]] int size() const noexcept { return size_; }
+    [[nodiscard]] int size() const noexcept { return top_index_ + 1; }
 
-    [[nodiscard]] intx::uint256& top() noexcept { return *top_item; }
+    [[nodiscard]] intx::uint256& top() noexcept { return stack_space_[top_index_]; }
 
     /// Returns the reference to the stack item on given position from the stack top.
-    [[nodiscard]] intx::uint256& operator[](int index) noexcept { return *(top_item - index); }
+    [[nodiscard]] intx::uint256& operator[](int index) noexcept
+    {
+        return stack_space_[top_index_ - index];
+    }
 
     /// Returns the const reference to the stack item on given position from the stack top.
     [[nodiscard]] const intx::uint256& operator[](int index) const noexcept
     {
-        return *(top_item - index);
+        return stack_space_[top_index_ - index];
     }
 
     /// Pushes an item on the stack. The stack limit is not checked.
-    void push(const intx::uint256& item) noexcept
-    {
-        ++size_;
-        *++top_item = item;
-    }
+    void push(const intx::uint256& item) noexcept { stack_space_[++top_index_] = item; }
 
     /// Returns an item popped from the top of the stack.
-    intx::uint256 pop() noexcept
-    {
-        --size_;
-        return *top_item--;
-    }
+    intx::uint256 pop() noexcept { return stack_space_[top_index_--]; }
 };
 
 
