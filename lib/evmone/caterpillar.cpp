@@ -14,189 +14,126 @@ namespace evmone::caterpillar
 {
 namespace
 {
-template <evmc_opcode Op>
-evmc_status_code cat_instr(ExecutionState& state, size_t pc) noexcept;
-
-
-template <>
-evmc_status_code cat_instr<OP_STOP>(ExecutionState&, size_t) noexcept
+[[gnu::always_inline]] inline code_iterator invoke(void (*instr_fn)(uint256*), uint256* stack_top,
+    code_iterator code_it, ExecutionState& /*state*/) noexcept
 {
-    return EVMC_SUCCESS;
+    instr_fn(stack_top);
+    return code_it + 1;
 }
 
-template <>
-evmc_status_code cat_instr<OP_RETURN>(ExecutionState& state, size_t) noexcept
+[[gnu::always_inline]] inline code_iterator invoke(StopToken (*instr_fn)(), uint256* /*stack_top*/,
+    code_iterator /*code_it*/, ExecutionState& state) noexcept
 {
-    instr::impl<OP_RETURN>(state);
-    return EVMC_SUCCESS;
+    state.status = instr_fn().status;
+    return nullptr;
 }
 
-using InstrFn = decltype(&cat_instr<OP_STOP>);
-
-constexpr evmc_opcode OP_UNDEFINED = static_cast<evmc_opcode>(0xEF);
-
-constexpr auto instr_table = []() noexcept {
-    std::array<InstrFn, 256> table{cat_instr<OP_STOP>, cat_instr<OP_ADD>, cat_instr<OP_MUL>,
-        cat_instr<OP_SUB>, cat_instr<OP_DIV>, cat_instr<OP_SDIV>, cat_instr<OP_MOD>,
-        cat_instr<OP_SMOD>, cat_instr<OP_ADDMOD>, cat_instr<OP_MULMOD>, cat_instr<OP_EXP>,
-        cat_instr<OP_SIGNEXTEND>, cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>,
-        cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>, cat_instr<OP_LT>, cat_instr<OP_GT>,
-        cat_instr<OP_SLT>, cat_instr<OP_SGT>, cat_instr<OP_EQ>, cat_instr<OP_ISZERO>,
-        cat_instr<OP_AND>, cat_instr<OP_OR>, cat_instr<OP_XOR>, cat_instr<OP_NOT>,
-        cat_instr<OP_BYTE>, cat_instr<OP_SHL>, cat_instr<OP_SHR>, cat_instr<OP_SAR>,
-        cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>, cat_instr<OP_KECCAK256>,
-        cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>,
-        cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>,
-        cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>,
-        cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>,
-        cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>,
-        cat_instr<OP_ADDRESS>, cat_instr<OP_BALANCE>, cat_instr<OP_ORIGIN>, cat_instr<OP_CALLER>,
-        cat_instr<OP_CALLVALUE>, cat_instr<OP_CALLDATALOAD>, cat_instr<OP_CALLDATASIZE>,
-        cat_instr<OP_CALLDATACOPY>, cat_instr<OP_CODESIZE>, cat_instr<OP_CODECOPY>,
-        cat_instr<OP_GASPRICE>, cat_instr<OP_EXTCODESIZE>, cat_instr<OP_EXTCODECOPY>,
-        cat_instr<OP_RETURNDATASIZE>, cat_instr<OP_RETURNDATACOPY>, cat_instr<OP_EXTCODEHASH>,
-        cat_instr<OP_BLOCKHASH>, cat_instr<OP_COINBASE>, cat_instr<OP_TIMESTAMP>,
-        cat_instr<OP_NUMBER>, cat_instr<OP_DIFFICULTY>, cat_instr<OP_GASLIMIT>,
-        cat_instr<OP_CHAINID>, cat_instr<OP_SELFBALANCE>, cat_instr<OP_BASEFEE>,
-        cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>,
-        cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>,
-        cat_instr<OP_UNDEFINED>, cat_instr<OP_POP>, cat_instr<OP_MLOAD>, cat_instr<OP_MSTORE>,
-        cat_instr<OP_MSTORE8>, cat_instr<OP_SLOAD>, cat_instr<OP_SSTORE>, cat_instr<OP_JUMP>,
-        cat_instr<OP_JUMPI>, cat_instr<OP_PC>, cat_instr<OP_MSIZE>, cat_instr<OP_GAS>,
-        cat_instr<OP_JUMPDEST>, cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>,
-        cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>, cat_instr<OP_PUSH1>, cat_instr<OP_PUSH2>,
-        cat_instr<OP_PUSH3>, cat_instr<OP_PUSH4>, cat_instr<OP_PUSH5>, cat_instr<OP_PUSH6>,
-        cat_instr<OP_PUSH7>, cat_instr<OP_PUSH8>, cat_instr<OP_PUSH9>, cat_instr<OP_PUSH10>,
-        cat_instr<OP_PUSH11>, cat_instr<OP_PUSH12>, cat_instr<OP_PUSH13>, cat_instr<OP_PUSH14>,
-        cat_instr<OP_PUSH15>, cat_instr<OP_PUSH16>, cat_instr<OP_PUSH17>, cat_instr<OP_PUSH18>,
-        cat_instr<OP_PUSH19>, cat_instr<OP_PUSH20>, cat_instr<OP_PUSH21>, cat_instr<OP_PUSH22>,
-        cat_instr<OP_PUSH23>, cat_instr<OP_PUSH24>, cat_instr<OP_PUSH25>, cat_instr<OP_PUSH26>,
-        cat_instr<OP_PUSH27>, cat_instr<OP_PUSH28>, cat_instr<OP_PUSH29>, cat_instr<OP_PUSH30>,
-        cat_instr<OP_PUSH31>, cat_instr<OP_PUSH32>, cat_instr<OP_DUP1>, cat_instr<OP_DUP2>,
-        cat_instr<OP_DUP3>, cat_instr<OP_DUP4>, cat_instr<OP_DUP5>, cat_instr<OP_DUP6>,
-        cat_instr<OP_DUP7>, cat_instr<OP_DUP8>, cat_instr<OP_DUP9>, cat_instr<OP_DUP10>,
-        cat_instr<OP_DUP11>, cat_instr<OP_DUP12>, cat_instr<OP_DUP13>, cat_instr<OP_DUP14>,
-        cat_instr<OP_DUP15>, cat_instr<OP_DUP16>, cat_instr<OP_SWAP1>, cat_instr<OP_SWAP2>,
-        cat_instr<OP_SWAP3>, cat_instr<OP_SWAP4>, cat_instr<OP_SWAP5>, cat_instr<OP_SWAP6>,
-        cat_instr<OP_SWAP7>, cat_instr<OP_SWAP8>, cat_instr<OP_SWAP9>, cat_instr<OP_SWAP10>,
-        cat_instr<OP_SWAP11>, cat_instr<OP_SWAP12>, cat_instr<OP_SWAP13>, cat_instr<OP_SWAP14>,
-        cat_instr<OP_SWAP15>, cat_instr<OP_SWAP16>, cat_instr<OP_LOG0>, cat_instr<OP_LOG1>,
-        cat_instr<OP_LOG2>, cat_instr<OP_LOG3>, cat_instr<OP_LOG4>, cat_instr<OP_UNDEFINED>,
-        cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>,
-        cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>,
-        cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>,
-        cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>,
-        cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>,
-        cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>,
-        cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>,
-        cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>,
-        cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>,
-        cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>,
-        cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>,
-        cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>,
-        cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>,
-        cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>,
-        cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>,
-        cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>,
-        cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>,
-        cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>,
-        cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>,
-        cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>,
-        cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>,
-        cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>,
-        cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>,
-        cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>,
-        cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>, cat_instr<OP_CREATE>, cat_instr<OP_CALL>,
-        cat_instr<OP_CALLCODE>, cat_instr<OP_RETURN>, cat_instr<OP_DELEGATECALL>,
-        cat_instr<OP_CREATE2>, cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>,
-        cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>, cat_instr<OP_STATICCALL>,
-        cat_instr<OP_UNDEFINED>, cat_instr<OP_UNDEFINED>, cat_instr<OP_REVERT>,
-        cat_instr<OP_INVALID>, cat_instr<OP_SELFDESTRUCT>};
-    return table;
-}();
-
-template <size_t Len>
-void load_push(ExecutionState& state, const uint8_t* code) noexcept
+[[gnu::always_inline]] inline code_iterator invoke(
+    evmc_status_code (*instr_fn)(uint256*, ExecutionState&), uint256* stack_top,
+    code_iterator code_it, ExecutionState& state) noexcept
 {
-    uint8_t buffer[Len];
-    // This valid because code is padded with garbage to satisfy push data read pass the code end.
-    std::memcpy(buffer, code, Len);
-    state.stack.push(intx::be::load<intx::uint256>(buffer));
-}
-
-template <evmc_opcode Op>
-evmc_status_code cat_instr(ExecutionState& state, size_t pc) noexcept
-{
-    // constexpr auto name = instr::traits[Op].name;
-    // if constexpr (name != nullptr)
-    //     std::cerr << name << std::endl;
-    // else
-    //     std::cerr << Op << std::endl;
-
-    static constexpr auto tr = instr::traits[Op];
-
-    if constexpr (tr.since != EVMC_FRONTIER)
+    if (const auto status = instr_fn(stack_top, state); status != EVMC_SUCCESS)
     {
-        if (INTX_UNLIKELY(state.rev < tr.since))
+        state.status = status;
+        return nullptr;
+    }
+    return code_it + 1;
+}
+
+[[gnu::always_inline]] inline code_iterator invoke(void (*instr_fn)(uint256*, ExecutionState&),
+    uint256* stack_top, code_iterator code_it, ExecutionState& state) noexcept
+{
+    instr_fn(stack_top, state);
+    return code_it + 1;
+}
+
+[[gnu::always_inline]] inline code_iterator invoke(
+    code_iterator (*instr_fn)(uint256*, ExecutionState&, code_iterator), uint256* stack_top,
+    code_iterator code_it, ExecutionState& state) noexcept
+{
+    return instr_fn(stack_top, state, code_it);
+}
+
+[[gnu::always_inline]] inline code_iterator invoke(StopToken (*instr_fn)(uint256*, ExecutionState&),
+    uint256* stack_top, code_iterator /*code_it*/, ExecutionState& state) noexcept
+{
+    state.status = instr_fn(stack_top, state).status;
+    return nullptr;
+}
+/// @}
+
+template <evmc_opcode Op>
+inline evmc_status_code check_requirements(
+    int64_t& gas_left, int stack_size, evmc_revision rev) noexcept
+{
+    static_assert(
+        !(instr::has_const_gas_cost(Op) && instr::gas_costs[EVMC_FRONTIER][Op] == instr::undefined),
+        "undefined instructions must not be handled by check_requirements()");
+
+    auto gas_cost = instr::gas_costs[EVMC_FRONTIER][Op];  // Init assuming const cost.
+    if constexpr (!instr::has_const_gas_cost(Op))
+    {
+        gas_cost = instr::gas_costs[rev][Op];  // If not, load the cost from the table.
+
+        // Negative cost marks an undefined instruction.
+        // This check must be first to produce correct error code.
+        if (INTX_UNLIKELY(gas_cost < 0))
             return EVMC_UNDEFINED_INSTRUCTION;
     }
-    else if constexpr (instr::gas_costs[EVMC_FRONTIER][Op] < 0)
-    {
-        return EVMC_UNDEFINED_INSTRUCTION;
-    }
 
-    if constexpr (tr.stack_height_required > 0)
+    // Check stack requirements first. This is order is not required,
+    // but it is nicer because complete gas check may need to inspect operands.
+    if constexpr (instr::traits[Op].stack_height_change > 0)
     {
-        if (INTX_UNLIKELY(state.stack.size() < tr.stack_height_required))
+        static_assert(instr::traits[Op].stack_height_change == 1);
+        if (INTX_UNLIKELY(stack_size == Stack::limit))
+            return EVMC_STACK_OVERFLOW;
+    }
+    if constexpr (instr::traits[Op].stack_height_required > 0)
+    {
+        if (INTX_UNLIKELY(stack_size < instr::traits[Op].stack_height_required))
             return EVMC_STACK_UNDERFLOW;
     }
 
-    if constexpr (tr.stack_height_change > 0)
-    {
-        if (INTX_UNLIKELY(state.stack.size() == Stack::limit))
-            return EVMC_STACK_OVERFLOW;
-    }
+    if (INTX_UNLIKELY((gas_left -= gas_cost) < 0))
+        return EVMC_OUT_OF_GAS;
 
-    if constexpr (instr::has_const_gas_cost(Op))
-    {
-        if (INTX_UNLIKELY((state.gas_left -= instr::gas_costs[EVMC_FRONTIER][Op]) < 0))
-            return EVMC_OUT_OF_GAS;
-    }
-    else
-    {
-        if (INTX_UNLIKELY((state.gas_left -= instr::gas_costs[state.rev][Op]) < 0))
-            return EVMC_OUT_OF_GAS;
-    }
+    return EVMC_SUCCESS;
+}
 
+template <evmc_opcode Op>
+evmc_status_code invoke(const uint256* stack_bottom, uint256* stack_top, code_iterator code_it,
+    ExecutionState& state) noexcept;
 
-    if constexpr (Op >= OP_PUSH1 && Op <= OP_PUSH32)
-    {
-        load_push<Op - OP_PUSH1 + 1>(state, state.code.data() + pc + 1);
-        pc += Op - OP_PUSH1 + 1;
-    }
-    else if constexpr (Op == OP_JUMPI)
-    {
-        if (state.stack[1] != 0)
-            pc = static_cast<size_t>(state.stack.pop()) - 1;
-        else
-            state.stack.pop();
-        state.stack.pop();
-    }
-    else if constexpr (Op == OP_JUMP)
-    {
-        pc = static_cast<size_t>(state.stack.pop()) - 1;
-    }
-    else if constexpr (Op == OP_JUMPDEST)
-    {}
-    else
-    {
-        const auto status = instr::impl<Op>(state);
-        if (status != EVMC_SUCCESS)
-            return status;
-    }
+using InstrFn = evmc_status_code (*)(const uint256* stack_bottom, uint256* stack_top,
+    code_iterator code_it, ExecutionState& state) noexcept;
 
-    ++pc;
-    [[clang::musttail]] return instr_table[state.code[pc]](state, pc);
+constexpr auto instr_table = []() noexcept {
+#define X(OPCODE, IDENTIFIER) invoke<OPCODE>,
+#define X_UNDEFINED(OPCODE)
+    std::array<InstrFn, 256> table{MAP_OPCODE_TO_IDENTIFIER};
+    return table;
+#undef X
+#undef X_UNDEFINED
+}();
+
+/// A helper to invoke the instruction implementation of the given opcode Op.
+template <evmc_opcode Op>
+evmc_status_code invoke(const uint256* stack_bottom, uint256* stack_top, code_iterator code_it,
+    ExecutionState& state) noexcept
+{
+    const auto stack_size = static_cast<int>(stack_top - stack_bottom);
+    if (const auto status = check_requirements<Op>(state.gas_left, stack_size, state.rev);
+        status != EVMC_SUCCESS)
+    {
+        state.status = status;
+        return status;
+    }
+    code_it = invoke(instr::core::impl<Op>, stack_top, code_it, state);
+    if (!code_it)
+        return state.status;
+
+    [[clang::musttail]] return instr_table[*code_it](stack_bottom, stack_top, code_it, state);
 }
 
 }  // namespace
@@ -207,7 +144,9 @@ evmc_result execute(
     const auto* code = analysis.padded_code.get();
 
     const auto first_fn = instr_table[*code];
-    const auto status = first_fn(state, 0);
+    const auto stack_bottom = state.stack.top_item;
+    auto stack_top = stack_bottom;
+    const auto status = first_fn(stack_bottom, stack_top, 0, state);
 
     const auto gas_left = (status == EVMC_SUCCESS || status == EVMC_REVERT) ? state.gas_left : 0;
     const auto result = evmc::make_result(status, gas_left,
