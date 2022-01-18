@@ -105,23 +105,32 @@ template <evmc_opcode Op>
 evmc_status_code invoke(const uint256* stack_bottom, uint256* stack_top, code_iterator code_it,
     ExecutionState& state) noexcept;
 
+evmc_status_code cat_undefined(const uint256* /*stack_bottom*/, uint256* /*stack_top*/,
+    code_iterator /*code_it*/, ExecutionState& /*state*/) noexcept
+{
+    return EVMC_UNDEFINED_INSTRUCTION;
+}
+
 using InstrFn = evmc_status_code (*)(const uint256* stack_bottom, uint256* stack_top,
     code_iterator code_it, ExecutionState& state) noexcept;
 
 constexpr auto instr_table = []() noexcept {
 #define X(OPCODE, IDENTIFIER) invoke<OPCODE>,
-#define X_UNDEFINED(OPCODE)
+#define X_UNDEFINED(OPCODE) cat_undefined,
     std::array<InstrFn, 256> table{MAP_OPCODE_TO_IDENTIFIER};
     return table;
 #undef X
 #undef X_UNDEFINED
 }();
+static_assert(std::size(instr_table) == 256);
+static_assert(instr_table[OP_PUSH2] == invoke<OP_PUSH2>);
 
 /// A helper to invoke the instruction implementation of the given opcode Op.
 template <evmc_opcode Op>
 evmc_status_code invoke(const uint256* stack_bottom, uint256* stack_top, code_iterator code_it,
     ExecutionState& state) noexcept
 {
+    [[maybe_unused]] auto op = Op;
     const auto stack_size = static_cast<int>(stack_top - stack_bottom);
     if (const auto status = check_requirements<Op>(state.gas_left, stack_size, state.rev);
         status != EVMC_SUCCESS)
@@ -133,6 +142,7 @@ evmc_status_code invoke(const uint256* stack_bottom, uint256* stack_top, code_it
     if (!code_it)
         return state.status;
 
+    stack_top += instr::traits[Op].stack_height_change;
     [[clang::musttail]] return instr_table[*code_it](stack_bottom, stack_top, code_it, state);
 }
 
@@ -141,12 +151,16 @@ evmc_status_code invoke(const uint256* stack_bottom, uint256* stack_top, code_it
 evmc_result execute(
     const VM& /*vm*/, ExecutionState& state, const baseline::CodeAnalysis& analysis) noexcept
 {
-    const auto* code = analysis.padded_code.get();
+    state.analysis.baseline = &analysis;  // Assign code analysis for instruction implementations.
 
-    const auto first_fn = instr_table[*code];
+    // Use padded code.
+    state.code = {analysis.padded_code.get(), state.code.size()};
+
+    const auto code_it = state.code.data();
+    const auto first_fn = instr_table[*code_it];
     const auto stack_bottom = state.stack.top_item;
     auto stack_top = stack_bottom;
-    const auto status = first_fn(stack_bottom, stack_top, 0, state);
+    const auto status = first_fn(stack_bottom, stack_top, code_it, state);
 
     const auto gas_left = (status == EVMC_SUCCESS || status == EVMC_REVERT) ? state.gas_left : 0;
     const auto result = evmc::make_result(status, gas_left,
