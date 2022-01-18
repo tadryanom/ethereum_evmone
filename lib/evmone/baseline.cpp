@@ -77,11 +77,6 @@ inline evmc_status_code check_requirements(
     if constexpr (!instr::has_const_gas_cost(Op))
     {
         gas_cost = cost_table[Op];  // If not, load the cost from the table.
-
-        // Negative cost marks an undefined instruction.
-        // This check must be first to produce correct error code.
-        if (INTX_UNLIKELY(gas_cost < 0))
-            return EVMC_UNDEFINED_INSTRUCTION;
     }
 
     // Check stack requirements first. This is order is not required,
@@ -120,7 +115,7 @@ inline evmc_status_code check_requirements(
            this improves compiler optimization. */                                   \
         position = next;                                                             \
     }                                                                                \
-    goto* cgoto_table[*position.code_it];
+    goto* current_cgoto_table[*position.code_it];
 
 
 /// The execution position.
@@ -201,15 +196,48 @@ evmc_result execute(const VM& vm, ExecutionState& state, const CodeAnalysis& ana
 {
 #pragma GCC diagnostic ignored "-Wpedantic"
 
-    static constexpr void* cgoto_table[] = {
-#define X(OPCODE, IGNORED) &&TARGET_##OPCODE,
-#define X_UNDEFINED(IGNORED) &&TARGET_OP_UNDEFINED,
-        MAP_OPCODE_TO_IDENTIFIER
+#define X(OPCODE, IGNORED) (instr::traits[OPCODE].since <= REVISION ? &&TARGET_##OPCODE : &&TARGET_OP_UNDEFINED),
+#define X_UNDEFINED(IGNORED) (&&TARGET_OP_UNDEFINED),
+    static constexpr void* cgoto_table[][256] = {
+#define REVISION EVMC_FRONTIER
+        {MAP_OPCODE_TO_IDENTIFIER},
+#undef REVISION
+#define REVISION EVMC_HOMESTEAD
+        {MAP_OPCODE_TO_IDENTIFIER},
+#undef REVISION
+#define REVISION EVMC_TANGERINE_WHISTLE
+        {MAP_OPCODE_TO_IDENTIFIER},
+#undef REVISION
+#define REVISION EVMC_SPURIOUS_DRAGON
+        {MAP_OPCODE_TO_IDENTIFIER},
+#undef REVISION
+#define REVISION EVMC_BYZANTIUM
+        {MAP_OPCODE_TO_IDENTIFIER},
+#undef REVISION
+#define REVISION EVMC_CONSTANTINOPLE
+        {MAP_OPCODE_TO_IDENTIFIER},
+#undef REVISION
+#define REVISION EVMC_PETERSBURG
+        {MAP_OPCODE_TO_IDENTIFIER},
+#undef REVISION
+#define REVISION EVMC_ISTANBUL
+        {MAP_OPCODE_TO_IDENTIFIER},
+#undef REVISION
+#define REVISION EVMC_BERLIN
+        {MAP_OPCODE_TO_IDENTIFIER},
+#undef REVISION
+#define REVISION EVMC_LONDON
+        {MAP_OPCODE_TO_IDENTIFIER},
+#undef REVISION
+#define REVISION EVMC_SHANGHAI
+        {MAP_OPCODE_TO_IDENTIFIER},
+#undef REVISION
+    };
+    static_assert(std::size(cgoto_table) == EVMC_MAX_REVISION + 1);
 #undef X
 #undef X_UNDEFINED
-    };
-    static_assert(std::size(cgoto_table) == 256);
 
+    auto& current_cgoto_table = cgoto_table[state.rev];
 
     state.analysis.baseline = &analysis;  // Assign code analysis for instruction implementations.
 
@@ -240,7 +268,7 @@ evmc_result execute(const VM& vm, ExecutionState& state, const CodeAnalysis& ana
         // }
 
         const auto op = *position.code_it;
-        goto* cgoto_table[op];
+        goto* current_cgoto_table[op];
         // switch (op)
         // {
 #define X(OPCODE, IGNORED) DISPATCH_CASE(OPCODE);
