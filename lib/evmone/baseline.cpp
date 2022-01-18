@@ -67,7 +67,7 @@ namespace
 ///          or EVMC_SUCCESS if everything is fine.
 template <evmc_opcode Op>
 inline evmc_status_code check_requirements(
-    const CostTable& cost_table, int64_t& gas_left, int /*stack_size*/) noexcept
+    const CostTable& cost_table, int64_t& /*gas_left*/, int /*stack_size*/) noexcept
 {
     static_assert(
         !(instr::has_const_gas_cost(Op) && instr::gas_costs[EVMC_FRONTIER][Op] == instr::undefined),
@@ -98,8 +98,8 @@ inline evmc_status_code check_requirements(
     //         return EVMC_STACK_UNDERFLOW;
     // }
 
-    if (INTX_UNLIKELY((gas_left -= gas_cost) < 0))
-        return EVMC_OUT_OF_GAS;
+    // if (INTX_UNLIKELY((gas_left -= gas_cost) < 0))
+    //     return EVMC_OUT_OF_GAS;
 
     return EVMC_SUCCESS;
 }
