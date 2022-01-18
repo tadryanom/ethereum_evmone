@@ -67,7 +67,7 @@ namespace
 ///          or EVMC_SUCCESS if everything is fine.
 template <evmc_opcode Op>
 inline evmc_status_code check_requirements(
-    const CostTable& cost_table, int64_t& gas_left, int stack_size) noexcept
+    const CostTable& cost_table, int64_t& gas_left, int /*stack_size*/) noexcept
 {
     static_assert(
         !(instr::has_const_gas_cost(Op) && instr::gas_costs[EVMC_FRONTIER][Op] == instr::undefined),
@@ -86,17 +86,17 @@ inline evmc_status_code check_requirements(
 
     // Check stack requirements first. This is order is not required,
     // but it is nicer because complete gas check may need to inspect operands.
-    if constexpr (instr::traits[Op].stack_height_change > 0)
-    {
-        static_assert(instr::traits[Op].stack_height_change == 1);
-        if (INTX_UNLIKELY(stack_size == Stack::limit))
-            return EVMC_STACK_OVERFLOW;
-    }
-    if constexpr (instr::traits[Op].stack_height_required > 0)
-    {
-        if (INTX_UNLIKELY(stack_size < instr::traits[Op].stack_height_required))
-            return EVMC_STACK_UNDERFLOW;
-    }
+    // if constexpr (instr::traits[Op].stack_height_change > 0)
+    // {
+    //     static_assert(instr::traits[Op].stack_height_change == 1);
+    //     if (INTX_UNLIKELY(stack_size == Stack::limit))
+    //         return EVMC_STACK_OVERFLOW;
+    // }
+    // if constexpr (instr::traits[Op].stack_height_required > 0)
+    // {
+    //     if (INTX_UNLIKELY(stack_size < instr::traits[Op].stack_height_required))
+    //         return EVMC_STACK_UNDERFLOW;
+    // }
 
     if (INTX_UNLIKELY((gas_left -= gas_cost) < 0))
         return EVMC_OUT_OF_GAS;
