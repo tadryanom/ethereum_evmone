@@ -106,22 +106,21 @@ inline evmc_status_code check_requirements(
 
 
 /// Implementation of a generic instruction "case".
-#define DISPATCH_CASE(OPCODE)                                                            \
-    case OPCODE:                                                                         \
-        ASM_COMMENT(OPCODE);                                                             \
-                                                                                         \
-        if (const auto next = invoke<OPCODE>(cost_table, stack_bottom, position, state); \
-            next.code_it == nullptr)                                                     \
-        {                                                                                \
-            goto exit;                                                                   \
-        }                                                                                \
-        else                                                                             \
-        {                                                                                \
-            /* Update current position only when no error,                               \
-               this improves compiler optimization. */                                   \
-            position = next;                                                             \
-        }                                                                                \
-        break
+#define DISPATCH_CASE(OPCODE)                                                        \
+    TARGET_##OPCODE : ASM_COMMENT(OPCODE);                                           \
+                                                                                     \
+    if (const auto next = invoke<OPCODE>(cost_table, stack_bottom, position, state); \
+        next.code_it == nullptr)                                                     \
+    {                                                                                \
+        goto exit;                                                                   \
+    }                                                                                \
+    else                                                                             \
+    {                                                                                \
+        /* Update current position only when no error,                               \
+           this improves compiler optimization. */                                   \
+        position = next;                                                             \
+    }                                                                                \
+    goto* cgoto_table[*position.code_it];
 
 
 /// The execution position.
@@ -200,6 +199,18 @@ template <evmc_opcode Op>
 template <bool TracingEnabled>
 evmc_result execute(const VM& vm, ExecutionState& state, const CodeAnalysis& analysis) noexcept
 {
+#pragma GCC diagnostic ignored "-Wpedantic"
+
+    static constexpr void* cgoto_table[] = {
+#define X(OPCODE, IGNORED) &&TARGET_##OPCODE,
+#define X_UNDEFINED(IGNORED) &&TARGET_OP_UNDEFINED,
+        MAP_OPCODE_TO_IDENTIFIER
+#undef X
+#undef X_UNDEFINED
+    };
+    static_assert(std::size(cgoto_table) == 256);
+
+
     state.analysis.baseline = &analysis;  // Assign code analysis for instruction implementations.
 
     // Use padded code.
@@ -217,26 +228,31 @@ evmc_result execute(const VM& vm, ExecutionState& state, const CodeAnalysis& ana
     // Code iterator and stack top pointer for interpreter loop.
     Position position{code, stack_bottom};
 
-    while (true)  // Guaranteed to terminate because padded code ends with STOP.
+    // while (true)  // Guaranteed to terminate because padded code ends with STOP.
     {
-        if constexpr (TracingEnabled)
-        {
-            const auto offset = static_cast<uint32_t>(position.code_it - code);
-            const auto stack_height = static_cast<int>(position.stack_top - stack_bottom);
-            if (offset < state.code.size())  // Skip STOP from code padding.
-                tracer->notify_instruction_start(offset, position.stack_top, stack_height, state);
-        }
+        // if constexpr (TracingEnabled)
+        // {
+        //     const auto offset = static_cast<uint32_t>(position.code_it - code);
+        //     const auto stack_height = static_cast<int>(position.stack_top - stack_bottom);
+        //     if (offset < state.code.size())  // Skip STOP from code padding.
+        //         tracer->notify_instruction_start(offset, position.stack_top, stack_height,
+        //         state);
+        // }
 
         const auto op = *position.code_it;
-        switch (op)
-        {
+        goto* cgoto_table[op];
+        // switch (op)
+        // {
 #define X(OPCODE, IGNORED) DISPATCH_CASE(OPCODE);
-            MAP_OPCODE_TO_IDENTIFIER
+#define X_UNDEFINED(IGNORED)
+        MAP_OPCODE_TO_IDENTIFIER
 #undef X
-        default:
-            state.status = EVMC_UNDEFINED_INSTRUCTION;
-            goto exit;
-        }
+#undef X_UNDEFINED
+    TARGET_OP_UNDEFINED:
+        // default:
+        state.status = EVMC_UNDEFINED_INSTRUCTION;
+        goto exit;
+        // }
     }
 
 exit:
