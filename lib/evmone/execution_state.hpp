@@ -39,13 +39,16 @@ struct Stack
     /// The storage allocated for maximum possible number of items.
     /// This is also the pointer to the bottom item.
     /// Items are aligned to 256 bits for better packing in cache lines.
-    alignas(sizeof(intx::uint256)) intx::uint256 storage[limit];
+    std::aligned_storage<sizeof(uint256), sizeof(uint256)> m_storage[limit];
+
+    const uint256* storage() const noexcept { return reinterpret_cast<const uint256*>(m_storage); }
+    uint256* storage() noexcept { return reinterpret_cast<uint256*>(m_storage); }
 
     /// Default constructor. Sets the top_item pointer to below the stack bottom.
     Stack() noexcept { clear(); }
 
     /// The current number of items on the stack.
-    [[nodiscard]] int size() const noexcept { return static_cast<int>(top_item + 1 - storage); }
+    [[nodiscard]] int size() const noexcept { return static_cast<int>(top_item + 1 - storage()); }
 
     /// Returns the reference to the top item.
     // NOLINTNEXTLINE(readability-make-member-function-const)
@@ -69,7 +72,7 @@ struct Stack
 
     /// Clears the stack by resetting its size to 0 (sets the top_item pointer to below the stack
     /// bottom).
-    [[clang::no_sanitize("bounds")]] void clear() noexcept { top_item = storage - 1; }
+    [[clang::no_sanitize("bounds")]] void clear() noexcept { top_item = storage() - 1; }
 };
 
 /// The EVM memory.
